@@ -13,6 +13,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.onerouteandroid.oneroute.auth.LoginScreen
 import com.onerouteandroid.oneroute.components.ComingSoonScreen
 import com.onerouteandroid.oneroute.home.HomeBottomBar
 import com.onerouteandroid.oneroute.home.HomeDrawerContent
@@ -27,7 +28,7 @@ import kotlinx.coroutines.launch
 fun AppNavigation() {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Home.route
+    val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Login.route
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val coroutineScope = rememberCoroutineScope()
@@ -35,27 +36,32 @@ fun AppNavigation() {
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            HomeDrawerContent(
-                currentRoute = currentRoute,
-                onItemClick = { destination ->
-                    when (destination) {
-                        "Inicio" -> navController.navigate(Screen.Home.route) {
-                            popUpTo(Screen.Home.route) { inclusive = true }
+            if (currentRoute != Screen.Login.route) {
+                HomeDrawerContent(
+                    currentRoute = currentRoute,
+                    onItemClick = { destination ->
+                        when (destination) {
+                            "Inicio" -> navController.navigate(Screen.Home.route) {
+                                popUpTo(Screen.Home.route) { inclusive = true }
+                            }
+                            "Buscar Viaje" -> navController.navigate(Screen.Search.route)
+                            "Mis Viajes" -> navController.navigate(Screen.MyRides.route)
+                            "Perfil" -> navController.navigate(Screen.Profile.route)
+                            "Cerrar Sesión" -> navController.navigate(Screen.Login.route) {
+                                popUpTo(Screen.Home.route) { inclusive = true }
+                            }
                         }
-                        "Buscar Viaje" -> navController.navigate(Screen.Search.route)
-                        "Mis Viajes" -> navController.navigate(Screen.MyRides.route)
-                        "Perfil" -> navController.navigate(Screen.Profile.route)
+                    },
+                    onCloseDrawer = {
+                        coroutineScope.launch { drawerState.close() }
                     }
-                },
-                onCloseDrawer = {
-                    coroutineScope.launch { drawerState.close() }
-                }
-            )
+                )
+            }
         }
     ) {
         Scaffold(
             topBar = {
-                if (currentRoute != Screen.LiveNav.route && currentRoute != Screen.RideDetail.route) {
+                if (currentRoute != Screen.Login.route && currentRoute != Screen.LiveNav.route && currentRoute != Screen.RideDetail.route) {
                     val titleText = when (currentRoute) {
                         Screen.Search.route -> "Buscar"
                         Screen.MyRides.route -> "Mis Viajes"
@@ -76,7 +82,7 @@ fun AppNavigation() {
                 }
             },
             bottomBar = {
-                if (currentRoute != Screen.LiveNav.route && currentRoute != Screen.RideDetail.route) {
+                if (currentRoute != Screen.Login.route && currentRoute != Screen.LiveNav.route && currentRoute != Screen.RideDetail.route) {
                     val selectedIndex = when (currentRoute) {
                         Screen.Home.route -> 0
                         Screen.Search.route -> 1
@@ -107,9 +113,29 @@ fun AppNavigation() {
         ) { innerPadding ->
             NavHost(
                 navController = navController,
-                startDestination = Screen.Home.route,
+                startDestination = Screen.Login.route,
                 modifier = Modifier.padding(innerPadding)
             ) {
+                composable(Screen.Login.route) {
+                    LoginScreen(
+                        onRegisterClick = {
+                            navController.navigate(Screen.Home.route) {
+                                popUpTo(Screen.Login.route) { inclusive = true }
+                            }
+                        },
+                        onLoginClick = {
+                            navController.navigate(Screen.Home.route) {
+                                popUpTo(Screen.Login.route) { inclusive = true }
+                            }
+                        },
+                        onSkipClick = {
+                            navController.navigate(Screen.Home.route) {
+                                popUpTo(Screen.Login.route) { inclusive = true }
+                            }
+                        }
+                    )
+                }
+
                 composable(Screen.Home.route) {
                     HomeScreen(
                         onSearchClick = { navController.navigate(Screen.Search.route) },
