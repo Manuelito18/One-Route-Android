@@ -25,9 +25,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.onerouteandroid.oneroute.R
+import com.onerouteandroid.oneroute.navigation.Screen
 
 @Composable
 fun HomeDrawerContent(
+    currentRoute: String = Screen.Home.route,
     onItemClick: (String) -> Unit = {},
     onCloseDrawer: () -> Unit = {}
 ) {
@@ -80,7 +82,7 @@ fun HomeDrawerContent(
                                 shape = RoundedCornerShape(12.dp)
                             ) {
                                 Text(
-                                    text = "✓ Verificado • Nivel 2",
+                                    text = "✓ DNI Verificado • Nivel 2",
                                     color = Color.White,
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.SemiBold,
@@ -106,7 +108,7 @@ fun HomeDrawerContent(
             DrawerMenuItem(
                 icon = Icons.Outlined.Home,
                 label = "Inicio",
-                isSelected = true,
+                isSelected = currentRoute == Screen.Home.route,
                 onClick = {
                     onItemClick("Inicio")
                     onCloseDrawer()
@@ -116,6 +118,7 @@ fun HomeDrawerContent(
             DrawerMenuItem(
                 icon = Icons.Outlined.Search,
                 label = "Buscar Viaje",
+                isSelected = currentRoute == Screen.Search.route,
                 onClick = {
                     onItemClick("Buscar Viaje")
                     onCloseDrawer()
@@ -125,6 +128,7 @@ fun HomeDrawerContent(
             DrawerMenuItem(
                 icon = Icons.Outlined.DirectionsCar,
                 label = "Mis Viajes",
+                isSelected = currentRoute == Screen.MyRides.route,
                 badge = "2 activos",
                 onClick = {
                     onItemClick("Mis Viajes")

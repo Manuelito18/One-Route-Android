@@ -23,6 +23,7 @@ import com.onerouteandroid.oneroute.R
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeTopBar(
+    title: String = "Inicio",
     onLogoClick: () -> Unit,
     onNotificationClick: () -> Unit = {},
     onProfileClick: () -> Unit = {}
@@ -60,7 +61,7 @@ fun HomeTopBar(
                 Spacer(modifier = Modifier.width(12.dp))
 
                 Text(
-                    text = "Inicio",
+                    text = title,
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
