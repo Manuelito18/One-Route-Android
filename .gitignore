@@ -39,3 +39,9 @@ Thumbs.db
 
 # Logs
 *.log
+
+#Las ayuditas xd
+.agents/
+.devcontainer/
+specs/
+skills-lock.json
