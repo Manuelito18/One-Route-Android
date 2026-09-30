@@ -2,10 +2,22 @@ package com.onerouteandroid.oneroute.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+// Paleta Light
+val PrimaryLight = Color(0xFF1D4ED8)
+val OnPrimaryLight = Color(0xFFFFFFFF)
+val SecondaryLight = Color(0xFFDBEAFE)
+val OnSecondaryLight = Color(0xFF1E3A8A)
+val TertiaryLight = Color(0xFFBA1A1A)
+val OnTertiaryLight = Color(0xFFFFFFFF)
+val SurfaceLight = Color(0xFFF8FAFC)
+val OnSurfaceLight = Color(0xFF0F172A)
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+// Paleta Dark
+val PrimaryDark = Color(0xFF93C5FD)
+val OnPrimaryDark = Color(0xFF0F172A)
+val SecondaryDark = Color(0xFF1E40AF)
+val OnSecondaryDark = Color(0xFFDBEAFE)
+val TertiaryDark = Color(0xFFFFB4AB)
+val OnTertiaryDark = Color(0xFF690005)
+val SurfaceDark = Color(0xFF0F172A)
+val OnSurfaceDark = Color(0xFFF1F5F9)
