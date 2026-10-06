@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <style name="Theme.OneRouteAndroid" parent="android:Theme.Material.Light.NoActionBar" />
+    <!-- El stub de legacy (android:Theme.Material.Light.NoActionBar) se descarta:
+         la app es 100% Compose Material3 con edge-to-edge, así que se usa el
+         padre DayNight.NoActionBar que el Manifest ya referencia. -->
+    <style name="Theme.OneRouteAndroid" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
 </resources>

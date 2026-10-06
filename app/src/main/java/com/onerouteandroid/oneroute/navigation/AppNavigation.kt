@@ -16,7 +16,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.onerouteandroid.oneroute.auth.ForgotPasswordScreen
 import com.onerouteandroid.oneroute.auth.LoginScreen
+import com.onerouteandroid.oneroute.auth.RegisterScreen
+import com.onerouteandroid.oneroute.auth.SignInScreen
+import com.onerouteandroid.oneroute.auth.VerifyOtpScreen
 import com.onerouteandroid.oneroute.components.ComingSoonScreen
 import com.onerouteandroid.oneroute.home.HomeBottomBar
 import com.onerouteandroid.oneroute.home.HomeDrawerContent
@@ -39,6 +43,10 @@ fun AppNavigation() {
     var targetDestinationAfterLoading by remember { mutableStateOf(Screen.Home.route) }
 
     val hideTopAndBottomBar = currentRoute == Screen.Login.route ||
+            currentRoute == Screen.SignIn.route ||
+            currentRoute == Screen.Register.route ||
+            currentRoute == Screen.ForgotPassword.route ||
+            currentRoute == Screen.VerifyOtp.route ||
             currentRoute == Screen.Loading.route ||
             currentRoute == Screen.LiveNav.route ||
             currentRoute == Screen.RideDetail.route
@@ -137,22 +145,71 @@ fun AppNavigation() {
                 composable(Screen.Login.route) {
                     LoginScreen(
                         onRegisterClick = {
-                            targetDestinationAfterLoading = Screen.Home.route
-                            navController.navigate(Screen.Loading.route) {
-                                popUpTo(Screen.Login.route) { inclusive = true }
-                            }
+                            navController.navigate(Screen.Register.route)
                         },
                         onLoginClick = {
-                            targetDestinationAfterLoading = Screen.Home.route
-                            navController.navigate(Screen.Loading.route) {
-                                popUpTo(Screen.Login.route) { inclusive = true }
-                            }
+                            navController.navigate(Screen.SignIn.route)
                         },
                         onSkipClick = {
                             targetDestinationAfterLoading = Screen.Home.route
                             navController.navigate(Screen.Loading.route) {
                                 popUpTo(Screen.Login.route) { inclusive = true }
                             }
+                        }
+                    )
+                }
+
+                composable(Screen.SignIn.route) {
+                    SignInScreen(
+                        onNavigateToRegister = {
+                            navController.navigate(Screen.Register.route)
+                        },
+                        onNavigateBack = { navController.popBackStack() },
+                        onForgotPassword = {
+                            navController.navigate(Screen.ForgotPassword.route)
+                        },
+                        onBiometricSignIn = {
+                            targetDestinationAfterLoading = Screen.Home.route
+                            navController.navigate(Screen.Loading.route) {
+                                popUpTo(Screen.SignIn.route) { inclusive = true }
+                            }
+                        },
+                        onGoogleSignIn = {
+                            targetDestinationAfterLoading = Screen.Home.route
+                            navController.navigate(Screen.Loading.route) {
+                                popUpTo(Screen.SignIn.route) { inclusive = true }
+                            }
+                        }
+                    )
+                }
+
+                composable(Screen.Register.route) {
+                    RegisterScreen(
+                        onNavigateToLogin = {
+                            navController.navigate(Screen.SignIn.route) {
+                                popUpTo(Screen.Register.route) { inclusive = true }
+                            }
+                        },
+                        onNavigateBack = { navController.popBackStack() }
+                    )
+                }
+
+                composable(Screen.ForgotPassword.route) {
+                    ForgotPasswordScreen(
+                        onNavigateBack = { navController.popBackStack() },
+                        onNavigateToLogin = {
+                            navController.navigate(Screen.SignIn.route) {
+                                popUpTo(Screen.ForgotPassword.route) { inclusive = true }
+                            }
+                        }
+                    )
+                }
+
+                composable(Screen.VerifyOtp.route) {
+                    VerifyOtpScreen(
+                        onBackClick = { navController.popBackStack() },
+                        onEditEmailClick = {
+                            navController.navigate(Screen.ForgotPassword.route)
                         }
                     )
                 }

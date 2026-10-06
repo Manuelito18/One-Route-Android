@@ -1,3 +1,218 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">OneRouteAndroid</string>
+
+    <!-- ================================================================
+         Register screen — copy mirrored from specs/ui/registro_screen.html
+         ================================================================ -->
+
+    <!-- Top app bar -->
+    <string name="register_top_bar_title">Passenger Profile Setup</string>
+    <string name="register_navigate_back">Volver</string>
+    <string name="register_profile_avatar">Perfil de la cuenta</string>
+    <string name="register_brand_logo">OneRoute</string>
+
+    <!-- Community banner -->
+    <string name="community_badge">Comunidad Segura</string>
+    <string name="community_title">Viaja acompañado hoy</string>
+    <string name="community_drivers_verified">+12,000 conductores verificados</string>
+    <string name="community_avatar_overflow">+99</string>
+    <string name="community_avatar_description">Miembros de la comunidad de conductoras y pasajeros</string>
+
+    <!-- Headline -->
+    <string name="register_title">Únete a RutaCompartida</string>
+    <string name="register_subtitle">Ingresa tus datos personales para comenzar a viajar y compartir gastos.</string>
+
+    <!-- Form fields -->
+    <string name="register_name_label">Nombre completo</string>
+    <string name="register_name_helper">Tal como aparece en tu identificación oficial</string>
+
+    <string name="register_email_label">Correo electrónico</string>
+    <string name="register_email_helper">Te enviaremos la confirmación de viaje aquí</string>
+    <string name="register_email_valid">Correo electrónico válido</string>
+
+    <string name="register_phone_label">Teléfono móvil</string>
+    <string name="register_phone_helper">Para coordinar puntos de encuentro por WhatsApp/SMS</string>
+    <string name="register_country_code">+52</string>
+    <string name="register_country_flag">🇲🇽</string>
+    <string name="register_country_code_description">Código de país: México. Toca para cambiarlo.</string>
+
+    <string name="register_password_label">Contraseña</string>
+    <string name="register_password_helper">Mínimo 8 caracteres, incluye letras y números</string>
+    <string name="register_show_password">Mostrar contraseña</string>
+    <string name="register_hide_password">Ocultar contraseña</string>
+    <string name="register_password_rule_met">Requisito de contraseña cumplido</string>
+
+    <!-- Password strength meter -->
+    <string name="register_password_strength_weak">Débil</string>
+    <string name="register_password_strength_fair">Media</string>
+    <string name="register_password_strength_strong">Segura</string>
+    <string name="register_password_strength_very_strong">Muy segura</string>
+
+    <!-- Validation errors -->
+    <string name="register_error_name">Ingresa tu nombre completo</string>
+    <string name="register_error_email">Ingresa un correo electrónico válido</string>
+    <string name="register_error_phone">Ingresa un número de 10 dígitos</string>
+    <string name="register_error_password">Mínimo 8 caracteres, incluyendo letras y números</string>
+    <string name="register_error_terms">Debes aceptar los Términos y la Política de Privacidad</string>
+
+    <!-- Consent checkboxes -->
+    <string name="register_terms_prefix">Acepto los </string>
+    <string name="register_terms_link">Términos y Condiciones</string>
+    <string name="register_terms_middle"> y la </string>
+    <string name="register_privacy_link">Política de Privacidad</string>
+    <string name="register_terms_suffix">.</string>
+    <string name="register_promos">Deseo recibir promociones, descuentos por viaje compartido y alertas de rutas frecuentes.</string>
+
+    <!-- Primary action -->
+    <string name="register_submit">Crear cuenta</string>
+    <string name="register_submitting">Validando…</string>
+    <string name="register_success">¡Cuenta Lista!</string>
+
+    <!-- Login redirection -->
+    <string name="register_login_question">¿Ya tienes una cuenta?</string>
+    <string name="register_login_action">Inicia sesión</string>
+
+    <!-- Trust badge -->
+    <string name="register_trust_title">Validación de identidad</string>
+    <string name="register_trust_body">Tus datos están protegidos con encriptación de 256 bits y verificación oficial.</string>
+
+    <!-- ================================================================
+         Login screen — copy mirrored from specs/ui/login_screen.html
+         ================================================================ -->
+
+    <!-- Top app bar -->
+    <string name="login_top_bar_title">Phone Login</string>
+
+    <!-- Ambient badge -->
+    <string name="login_badge">Comunidad de Viajeros</string>
+
+    <!-- Welcome header -->
+    <string name="login_welcome_title">¡Qué bueno verte de nuevo!</string>
+    <string name="login_welcome_subtitle">Ingresa tus credenciales para continuar tus viajes compartidos y ahorrar en cada trayecto.</string>
+
+    <!-- Fields -->
+    <string name="login_identifier_label">Correo electrónico o teléfono</string>
+    <string name="login_identifier_placeholder">ejemplo@correo.com</string>
+    <string name="login_clear_identifier">Limpiar campo</string>
+    <string name="login_password_label">Contraseña</string>
+    <string name="login_password_placeholder">••••••••</string>
+
+    <!-- Controls -->
+    <string name="login_remember_me">Recordarme</string>
+    <string name="login_forgot_password">¿Olvidaste tu contraseña?</string>
+
+    <!-- Primary action -->
+    <string name="login_submit">Ingresar</string>
+    <string name="login_submitting">Ingresando…</string>
+    <string name="login_success">¡Listo!</string>
+
+    <!-- Biometric quick access -->
+    <string name="login_biometric">Ingreso biométrico</string>
+    <string name="login_biometric_description">Acceso rápido biométrico</string>
+
+    <!-- Social sign-in -->
+    <string name="login_separator">O ingresa con</string>
+    <string name="login_google">Continuar con Google</string>
+
+    <!-- Footer link -->
+    <string name="login_register_question">¿No tienes una cuenta?</string>
+    <string name="login_register_action">Regístrate aquí</string>
+
+    <!-- Validation errors -->
+    <string name="login_error_identifier">Ingresa un correo electrónico o un número de teléfono válido</string>
+    <string name="login_error_password">Ingresa tu contraseña</string>
+
+    <!-- ================================================================
+         Forgot password screen — copy mirrored from
+         specs/ui/recuperar_contrasena_screen.html
+         ================================================================ -->
+
+    <!-- Top app bar -->
+    <string name="forgot_top_bar_title">Account Recovery</string>
+    <string name="forgot_navigate_back">Volver</string>
+    <string name="forgot_profile_avatar">Perfil de la cuenta</string>
+    <string name="forgot_brand_logo">OneRoute</string>
+
+    <!-- Security chip -->
+    <string name="forgot_badge">Seguridad y Cuenta</string>
+    <string name="forgot_badge_icon_description">Reinicio seguro de contraseña</string>
+
+    <!-- Hero -->
+    <string name="forgot_illustration_description">Candado abierto con escudo de verificación</string>
+    <string name="forgot_shield_description">Cuenta verificada</string>
+    <string name="forgot_title">¿Olvidaste tu contraseña?</string>
+    <string name="forgot_subtitle">No te preocupes, ingresa tu correo electrónico o teléfono registrado y te enviaremos un código de verificación para restablecerla.</string>
+
+    <!-- Recovery method selector -->
+    <string name="forgot_method_group_description">Método de recuperación</string>
+    <string name="forgot_method_email_title">Enviar por Correo</string>
+    <string name="forgot_method_sms_title">Enviar por SMS / WhatsApp</string>
+    <string name="forgot_method_email_placeholder">nombre@ejemplo.com</string>
+    <string name="forgot_method_sms_placeholder">+52 55 •••• 1047</string>
+    <string name="forgot_method_selected">Seleccionado</string>
+    <string name="forgot_method_not_selected">Sin seleccionar</string>
+
+    <!-- Contact field -->
+    <string name="forgot_email_label">Correo electrónico registrado</string>
+    <string name="forgot_email_placeholder">nombre@ejemplo.com</string>
+    <string name="forgot_email_helper">Asegúrate de tener acceso a esta bandeja de entrada.</string>
+    <string name="forgot_sms_label">Número celular registrado</string>
+    <string name="forgot_sms_placeholder">+52 55 4912 1047</string>
+    <string name="forgot_sms_helper">Te enviaremos un SMS con el código de confirmación.</string>
+    <string name="forgot_field_valid">Dato listo para enviar</string>
+
+    <!-- Validation errors -->
+    <string name="forgot_error_email">Ingresa un correo electrónico válido</string>
+    <string name="forgot_error_phone">Ingresa un número de 10 dígitos</string>
+
+    <!-- Expiry information card -->
+    <string name="forgot_expiry_title">Vigencia temporal</string>
+    <string name="forgot_expiry_body">Por tu seguridad y la de la comunidad de viajes, el código de 6 dígitos expirará en 10 minutos.</string>
+
+    <!-- Primary action -->
+    <string name="forgot_submit">Enviar código OTP</string>
+    <string name="forgot_submitting">Enviando código…</string>
+    <string name="forgot_success">¡Código enviado!</string>
+    <string name="forgot_resend">Reenviar código</string>
+
+    <!-- Local confirmation card -->
+    <string name="forgot_success_title_email">Revisa tu bandeja de entrada</string>
+    <string name="forgot_success_title_sms">Revisa tus mensajes</string>
+    <string name="forgot_success_body">Enviamos un código de 6 dígitos a %1$s. Válido durante 10 minutos.</string>
+    <string name="forgot_success_icon_description">Código enviado correctamente</string>
+
+    <!-- Login redirection -->
+    <string name="forgot_login_question">¿Recordaste tu contraseña?</string>
+    <string name="forgot_login_action">Iniciar sesión</string>
+
+    <!-- ================================================================
+         Verify OTP screen — copy mirrored from specs/ui/verificar_otp.html
+         ================================================================ -->
+
+    <!-- Top app bar -->
+    <string name="verify_otp_top_bar_title">Two Factor Verification</string>
+    <string name="verify_otp_navigate_back">Volver</string>
+    <string name="verify_otp_brand_logo">OneRoute</string>
+    <string name="verify_otp_profile_avatar">Perfil de la cuenta</string>
+    <string name="verify_otp_more_options">Más opciones</string>
+
+    <!-- Identity banner -->
+    <string name="verify_otp_hero_title">Verifica tu identidad</string>
+    <string name="verify_otp_hero_body">Hemos enviado un código de %1$d dígitos a</string>
+    <string name="verify_otp_change_email">Cambiar correo</string>
+
+    <!-- OTP card -->
+    <string name="verify_otp_card_label">Código de seguridad</string>
+    <string name="verify_otp_card_tls">Cifrado TLS</string>
+    <string name="verify_otp_resend_in">Reenviar en %1$s</string>
+    <string name="verify_otp_resend_action">Reenviar código</string>
+
+    <!-- Resend prompt -->
+    <string name="verify_otp_resend_prompt">¿No recibiste el código?</string>
+    <string name="verify_otp_resend_link">Reenviar</string>
+
+    <!-- Primary action -->
+    <string name="verify_otp_verify">Verificar código</string>
+    <string name="verify_otp_verifying">Verificando…</string>
 </resources>
