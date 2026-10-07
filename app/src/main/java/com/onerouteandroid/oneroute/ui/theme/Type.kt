@@ -8,13 +8,12 @@ import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.sp
 
 /*
- * OneRoute type scale — taken verbatim from the `typography` block of
+ * OneRoute type scale, taken verbatim from the `typography` block of
  * `specs/ui/DESIGN.md`.
  *
- * The spec asks for "Roboto Flex". That family is not bundled with the OS, so
- * the app ships [FontFamily.SansSerif], which resolves to the platform Roboto
- * on every Android device. The metrics below are what actually drive the
- * layout, so swapping the family in later is a one-line change here.
+ * The spec asks for "Roboto Flex", which the OS does not bundle, so the app
+ * ships [FontFamily.SansSerif] (platform Roboto). Swapping the family later is
+ * a one-line change here; the metrics are what drive the layout.
  */
 private val OneRouteFontFamily: FontFamily = FontFamily.SansSerif
 
@@ -38,10 +37,7 @@ private fun oneRouteStyle(
     lineHeightStyle = TightLineHeight,
 )
 
-/**
- * Standalone styles for the scale steps that Material 3 has no dedicated slot
- * for, so they cannot be reached through [Typography].
- */
+/** Scale steps with no [Typography] slot, so they need standalone styles. */
 object OneRouteType {
     /** `headline-lg` — 32sp / 40sp / 700. Screen entry titles. */
     val HeadlineLarge = oneRouteStyle(32, 40, FontWeight.Bold, 0.0)

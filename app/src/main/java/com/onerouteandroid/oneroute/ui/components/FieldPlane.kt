@@ -33,16 +33,14 @@ import com.onerouteandroid.oneroute.ui.theme.OneRouteElevation
 const val FieldAnimationMillis = 180
 
 /**
- * The rounded plane that sits behind a form field.
+ * The rounded plane behind a form field.
  *
- * Both auth screens need the same behaviour and differ only in a handful of
- * numbers, so the animated shadow, the rest/focus container colours, the error
- * ring and the focus reporting all live here. Each screen keeps its own label
- * strategy — the registration form floats the label over the top edge, the login
- * form sets it above the field — which is why only the plane is shared.
+ * Shared because every auth screen wants the same animated shadow, rest/focus
+ * colours, error ring and focus reporting; only the numbers differ. Label
+ * strategy stays per-screen (registration floats it, sign-in sets it above).
  *
- * The mock's fields are borderless, so the resting shadow is always Level 1 and
- * steps to Level 2 on focus (`focus-within:shadow-md`).
+ * Fields are borderless, so the resting shadow is Level 1 and steps to Level 2
+ * on focus.
  */
 @Composable
 fun FieldPlane(
@@ -129,10 +127,7 @@ fun FieldLeadingIcon(
     )
 }
 
-/**
- * Helper / error line under a field, matching the mock's `mt-1.5 px-3`:
- * 6dp below the plane, 12dp in from its edge, set in `label-small`.
- */
+/** Helper / error line under a field: 6dp below the plane, inset 12dp. */
 @Composable
 fun FieldHelperLine(
     text: String,

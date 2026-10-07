@@ -3,12 +3,8 @@ package com.onerouteandroid.oneroute.ui.theme
 import androidx.compose.ui.graphics.Color
 
 /*
- * OneRoute — "Shared Mobility M3" palette.
- *
- * Values are taken verbatim from the `colors` block of `specs/ui/DESIGN.md`,
- * which is the same block consumed by the Tailwind configuration embedded in the
- * HTML mock-ups under `specs/ui/`. They are therefore guaranteed to match the
- * approved design, not an approximation of it.
+ * OneRoute — "Shared Mobility M3" palette, taken verbatim from the `colors`
+ * block of `specs/ui/DESIGN.md` so the app matches the approved mock-ups exactly.
  */
 
 // ---------------------------------------------------------------- Primary ---
@@ -58,11 +54,8 @@ val OneRouteSurfaceTint = Color(0xFF2151DA)
 val OneRouteOutline = Color(0xFF747686)
 val OneRouteOutlineVariant = Color(0xFFC4C5D7)
 
-/*
- * "Fixed" roles hold the same value in light and dark mode, which is exactly
- * why Material keeps them out of [androidx.compose.material3.ColorScheme].
- * They are exposed as plain tokens so screens can use them directly.
- */
+/* "Fixed" roles are identical in light and dark mode, so Material keeps them out
+ * of [androidx.compose.material3.ColorScheme]; screens use them as tokens. */
 val OneRoutePrimaryFixed = Color(0xFFDCE1FF)
 val OneRoutePrimaryFixedDim = Color(0xFFB7C4FF)
 val OneRouteOnPrimaryFixed = Color(0xFF001551)

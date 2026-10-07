@@ -89,30 +89,6 @@ import com.onerouteandroid.oneroute.ui.theme.OneRouteSpacing
 import com.onerouteandroid.oneroute.ui.theme.OneRouteType
 import kotlinx.coroutines.delay
 
-/*
- * =============================================================================
- *  Phone / e-mail sign-in — "¡Qué bueno verte de nuevo!"
- * =============================================================================
- *  Compose port of `specs/ui/login_screen.html`, built on the tokens declared in
- *  `specs/ui/DESIGN.md` and on the shared field primitives in
- *  `ui/components/FieldPlane.kt`.
- *
- *  Scope: presentation and local interaction only. No authentication, no
- *  persistence, no network.
- *
- *  Layering:
- *   • [SignInUiState]      – one immutable snapshot of everything needed to draw
- *                           a frame (text, flags, validation feedback, status).
- *   • [SignInScreenContent] – stateless and fully hoisted: it takes that state
- *                           plus one callback per user intent, so it renders
- *                           from a @Preview, a test or any other destination
- *                           without extra wiring.
- *   • [SignInScreen]       – stateful container that owns the in-memory state,
- *                           runs the validation and drives the
- *                           "Ingresando… / ¡Listo!" feedback loop.
- * =============================================================================
- */
-
 // ---------------------------------------------------------------------------
 // State model
 // ---------------------------------------------------------------------------
@@ -120,31 +96,17 @@ import kotlinx.coroutines.delay
 /** Identifies a field so focus can be reported as part of [SignInUiState]. */
 enum class SignInField { Identifier, Password }
 
-/**
- * Lifecycle of the primary action, driving the button's three visual states.
- *
- * The mock has no loading treatment for the submit button, so this mirrors the
- * flow already shipped on [RegisterScreen] to keep the two auth screens
- * consistent within the design system.
- */
+/** Lifecycle of the primary action. */
 enum class SignInSubmitState { Idle, Submitting, Success }
 
 private const val MinPhoneDigits = 10
 private val EmailRegex = Regex("^[A-Za-z0-9._%+\\-]+@[A-Za-z0-9.\\-]+\\.[A-Za-z]{2,}$")
 
-/**
- * Everything [SignInScreenContent] needs in order to render one frame.
- *
- * Free of `Context`, callbacks and coroutine scopes by design: a preview or a
- * unit test can build one from a literal and assert on it directly.
- */
+/** Everything [SignInScreenContent] needs in order to render one frame. */
 @Immutable
 data class SignInUiState(
     // --- text fields ---
-    /**
-     * The account identifier. The mock labels the field "Correo electrónico o
-     * teléfono", so [isIdentifierValid] accepts either form.
-     */
+    /** The account identifier. The mock labels the field "Correo electrónico o teléfono", so [isIdentifierValid] accepts either form. */
     val email: String = "",
     val password: String = "",
 
@@ -160,10 +122,7 @@ data class SignInUiState(
     // --- primary action ---
     val submitState: SignInSubmitState = SignInSubmitState.Idle,
 ) {
-    /**
-     * True when the identifier is either a well-formed e-mail address or a
-     * phone number with at least [MinPhoneDigits] digits.
-     */
+    /** True when the identifier is either a well-formed e-mail address or a phone number with at least [MinPhoneDigits] digits. */
     val isIdentifierValid: Boolean
         get() {
             val trimmed = email.trim()
@@ -191,10 +150,7 @@ private data class LoginErrorCopy(
     val password: String,
 )
 
-/**
- * Returns the state with field errors populated, plus whether any of them
- * fired. Pure: no `Context`, no coroutines, directly unit-testable.
- */
+/** Returns the state with field errors populated, plus whether any of them fired. Pure: no `Context`, no coroutines, directly unit-testable. */
 private fun validateLogin(
     state: SignInUiState,
     copy: LoginErrorCopy,
@@ -213,20 +169,7 @@ private fun validateLogin(
 // Container
 // ---------------------------------------------------------------------------
 
-/**
- * Stateful entry point for the login screen.
- *
- * Owns the in-memory [SignInUiState] so the screen is interactive the moment it
- * is shown: both fields accept text, the password toggle flips, "Recordarme"
- * toggles, the identifier can be cleared, and the primary action validates
- * before playing its feedback loop.
- *
- * @param onNavigateToRegister invoked when the user taps "Regístrate aquí".
- * @param onNavigateBack invoked when the user taps the top app bar back button.
- * @param onForgotPassword invoked when the user taps "¿Olvidaste tu contraseña?".
- * @param onBiometricSignIn invoked when the user taps the biometric quick-access chip.
- * @param onGoogleSignIn invoked when the user taps "Continuar con Google".
- */
+/** Stateful entry point for the login screen. */
 @Composable
 fun SignInScreen(
     modifier: Modifier = Modifier,
@@ -295,14 +238,7 @@ private const val SubmitIndicatorDurationMillis = 900L
 // Stateless content
 // ---------------------------------------------------------------------------
 
-/**
- * Stateless, fully hoisted login screen.
- *
- * Renders [state] and reports every user intent through its callbacks. It owns
- * no state beyond transient interaction feedback (press scaling, animated
- * colours), so a [SignInUiState] literal is all a preview or a Compose test
- * needs.
- */
+/** Stateless, fully hoisted login screen. */
 @Composable
 fun SignInScreenContent(
     state: SignInUiState,
@@ -343,26 +279,22 @@ fun SignInScreenContent(
                 .imePadding()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = OneRouteSpacing.Margin)
-                // The mock's `pb-12` on <main> plus `pb-space-xl` on the content.
                 .padding(bottom = 48.dp + OneRouteSpacing.SpaceXl),
         ) {
             CommunityBadge(
                 modifier = Modifier.padding(
-                    top = OneRouteSpacing.SpaceSm, // mt-space-sm
-                    bottom = OneRouteSpacing.SpaceMd, // mb-space-md
+                    top = OneRouteSpacing.SpaceSm,
+                    bottom = OneRouteSpacing.SpaceMd,
                 ),
             )
-
-            // -- Welcome header (mb-space-lg) ------------------------------
             Text(
                 text = stringResource(R.string.login_welcome_title),
                 style = OneRouteType.HeadlineLargeMobile.copy(
-                    // The mock tightens the display headline with `tracking-tight`.
                     letterSpacing = (-0.7).sp,
                 ),
                 color = MaterialTheme.colorScheme.onSurface,
             )
-            Spacer(Modifier.height(OneRouteSpacing.SpaceXs)) // mb-1
+            Spacer(Modifier.height(OneRouteSpacing.SpaceXs))
             Text(
                 text = stringResource(R.string.login_welcome_subtitle),
                 style = MaterialTheme.typography.bodyMedium,
@@ -370,8 +302,6 @@ fun SignInScreenContent(
             )
 
             Spacer(Modifier.height(OneRouteSpacing.SpaceLg))
-
-            // -- Form (gap-space-md) ----------------------------------------
             LoginIdentifierField(
                 value = state.email,
                 onValueChange = onEmailChange,
@@ -384,7 +314,7 @@ fun SignInScreenContent(
                 onMoveFocusDown = onMoveFocusDown,
             )
 
-            Spacer(Modifier.height(OneRouteSpacing.SpaceMd)) // gap-space-md
+            Spacer(Modifier.height(OneRouteSpacing.SpaceMd))
 
             LoginPasswordField(
                 value = state.password,
@@ -400,13 +330,13 @@ fun SignInScreenContent(
             )
 
             // The controls sit inside the form, so they clear the last field by
-            // the form gap *and* by their own `mt-1`: 16dp + 4dp.
+
             Spacer(Modifier.height(OneRouteSpacing.SpaceMd + OneRouteSpacing.SpaceXs))
 
             // -- "Recordarme" + "¿Olvidaste tu contraseña?" -------------------
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween, // justify-between
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 RememberMeCheckbox(
@@ -415,8 +345,6 @@ fun SignInScreenContent(
                 )
                 ForgotPasswordButton(onClick = onForgotPasswordClick)
             }
-
-            // -- Primary action (form gap + mt-space-sm = 16dp + 8dp) --------
             LoginSubmitButton(
                 submitState = state.submitState,
                 enabled = !state.isLoading,
@@ -425,21 +353,15 @@ fun SignInScreenContent(
                     top = OneRouteSpacing.SpaceMd + OneRouteSpacing.SpaceSm,
                 ),
             )
-
-            // -- Biometric quick access (mt-space-lg) -----------------------
             BiometricButton(
                 onClick = onBiometricClick,
                 modifier = Modifier.padding(top = OneRouteSpacing.SpaceLg),
             )
-
-            // -- "O ingresa con" separator (my-space-lg) ---------------------
             OrSeparator(
                 modifier = Modifier.padding(vertical = OneRouteSpacing.SpaceLg),
             )
 
             GoogleSignInButton(onClick = onGoogleSignInClick)
-
-            // -- Footer link (mt-space-xl) ----------------------------------
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -452,7 +374,7 @@ fun SignInScreenContent(
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                Spacer(Modifier.width(6.dp)) // gap-1.5
+                Spacer(Modifier.width(6.dp))
                 val actionLabel = stringResource(R.string.login_register_action)
                 Text(
                     text = actionLabel,
@@ -491,8 +413,7 @@ private fun LoginTopBar(
         shadowElevation = OneRouteElevation.Resting,
     ) {
         Column {
-            // The 24dp native status-bar strip; the OS clock and system icons
-            // are drawn by the platform, not by the app.
+            // Native status-bar strip drawn by the platform.
             Spacer(
                 Modifier
                     .fillMaxWidth()
@@ -501,14 +422,14 @@ private fun LoginTopBar(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(64.dp) // h-16
-                    .padding(horizontal = OneRouteSpacing.SpaceSm) // px-space-sm
+                    .height(64.dp)
+                    .padding(horizontal = OneRouteSpacing.SpaceSm)
                     .consumeWindowInsets(WindowInsets.statusBars),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 IconButton(
                     onClick = onNavigateBack,
-                    modifier = Modifier.size(44.dp), // w-11 h-11
+                    modifier = Modifier.size(44.dp),
                     colors = IconButtonDefaults.iconButtonColors(
                         containerColor = Color.Transparent,
                         contentColor = MaterialTheme.colorScheme.onSurface,
@@ -542,11 +463,7 @@ private fun LoginTopBar(
     }
 }
 
-/**
- * Local stand-in for the remote brand mark in the mock: a primary disc with a
- * white route glyph, so the header keeps its visual weight without pulling in
- * an image loader for a static asset.
- */
+/** Primary disc with a route glyph, standing in for the remote brand mark. */
 @Composable
 private fun BrandMark(
     contentDescription: String,
@@ -554,7 +471,7 @@ private fun BrandMark(
 ) {
     Box(
         modifier = modifier
-            .size(32.dp) // h-8
+            .size(32.dp)
             .clip(CircleShape)
             .background(MaterialTheme.colorScheme.primary)
             .semantics { this.contentDescription = contentDescription },
@@ -576,7 +493,7 @@ private fun ProfileAvatar(
 ) {
     Box(
         modifier = modifier
-            .size(32.dp) // w-8 h-8
+            .size(32.dp)
             .clip(CircleShape)
             .background(MaterialTheme.colorScheme.surfaceContainerHigh)
             .semantics { this.contentDescription = contentDescription },
@@ -603,8 +520,8 @@ private fun CommunityBadge(modifier: Modifier = Modifier) {
             .clip(CircleShape)
             .background(MaterialTheme.colorScheme.secondaryContainer)
             .padding(
-                horizontal = OneRouteSpacing.SpaceMd, // px-space-md
-                vertical = OneRouteSpacing.SpaceXs, // py-1
+                horizontal = OneRouteSpacing.SpaceMd,
+                vertical = OneRouteSpacing.SpaceXs,
             ),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(OneRouteSpacing.SpaceXs),
@@ -619,7 +536,7 @@ private fun CommunityBadge(modifier: Modifier = Modifier) {
             text = stringResource(R.string.login_badge).uppercase(),
             style = MaterialTheme.typography.labelSmall.copy(
                 fontWeight = FontWeight.SemiBold,
-                letterSpacing = 0.35.sp, // tracking-wide
+                letterSpacing = 0.35.sp,
             ),
             color = MaterialTheme.colorScheme.onSecondaryContainer,
         )
@@ -636,17 +553,14 @@ private val SignInFieldHeight = 52.dp
 /** `rounded-lg` on the mock's field containers. */
 private val SignInFieldShape = RoundedCornerShape(OneRouteRadius.Card)
 
-/**
- * External caption shared by both login fields: `label-sm`, 12dp in from the
- * field edge, set in `on-surface-variant`.
- */
+/** External caption shared by both login fields: `label-sm`, 12dp in from the field edge, set in `on-surface-variant`. */
 @Composable
 private fun SignInFieldCaption(text: String) {
     Text(
         text = text,
         style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
         color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(start = 12.dp), // ml-3
+        modifier = Modifier.padding(start = 12.dp),
     )
 }
 
@@ -671,7 +585,7 @@ private fun LoginIdentifierField(
 
     Column(modifier = modifier.fillMaxWidth()) {
         SignInFieldCaption(stringResource(R.string.login_identifier_label))
-        Spacer(Modifier.height(OneRouteSpacing.SpaceXs)) // gap-1
+        Spacer(Modifier.height(OneRouteSpacing.SpaceXs))
 
         FieldPlane(
             focused = focused,
@@ -690,7 +604,7 @@ private fun LoginIdentifierField(
                 FieldLeadingIcon(
                     imageVector = OneRouteIcons.Mail,
                     tint = outline, // text-outline
-                    modifier = Modifier.padding(start = 16.dp), // ml-4
+                    modifier = Modifier.padding(start = 16.dp),
                 )
 
                 BasicTextField(
@@ -698,7 +612,7 @@ private fun LoginIdentifierField(
                     onValueChange = onValueChange,
                     modifier = Modifier
                         .weight(1f)
-                        .padding(start = 12.dp), // px-3
+                        .padding(start = 12.dp),
                     enabled = true,
                     readOnly = false,
                     textStyle = MaterialTheme.typography.bodyLarge.copy(color = onSurface),
@@ -716,7 +630,7 @@ private fun LoginIdentifierField(
                                 Text(
                                     text = stringResource(R.string.login_identifier_placeholder),
                                     style = MaterialTheme.typography.bodyLarge,
-                                    color = outline, // placeholder:text-outline
+                                    color = outline,
                                     maxLines = 1,
                                 )
                             }
@@ -729,7 +643,7 @@ private fun LoginIdentifierField(
                 // reserving the slot keeps the text from resizing as it appears.
                 Box(
                     modifier = Modifier
-                        .padding(end = 12.dp) // mr-3
+                        .padding(end = 12.dp)
                         .size(26.dp), // p-1 + 18px glyph
                     contentAlignment = Alignment.Center,
                 ) {
@@ -787,7 +701,7 @@ private fun LoginPasswordField(
 
     Column(modifier = modifier.fillMaxWidth()) {
         SignInFieldCaption(stringResource(R.string.login_password_label))
-        Spacer(Modifier.height(OneRouteSpacing.SpaceXs)) // gap-1
+        Spacer(Modifier.height(OneRouteSpacing.SpaceXs))
 
         FieldPlane(
             focused = focused,
@@ -805,7 +719,7 @@ private fun LoginPasswordField(
                 FieldLeadingIcon(
                     imageVector = OneRouteIcons.Lock,
                     tint = outline, // text-outline
-                    modifier = Modifier.padding(start = 16.dp), // ml-4
+                    modifier = Modifier.padding(start = 16.dp),
                 )
 
                 BasicTextField(
@@ -813,7 +727,7 @@ private fun LoginPasswordField(
                     onValueChange = onValueChange,
                     modifier = Modifier
                         .weight(1f)
-                        .padding(start = 12.dp) // px-3
+                        .padding(start = 12.dp)
                         .padding(end = 8.dp),
                     enabled = true,
                     readOnly = false,
@@ -842,7 +756,7 @@ private fun LoginPasswordField(
                                 Text(
                                     text = stringResource(R.string.login_password_placeholder),
                                     style = MaterialTheme.typography.bodyLarge,
-                                    color = outline, // placeholder:text-outline
+                                    color = outline,
                                     maxLines = 1,
                                 )
                             }
@@ -852,7 +766,7 @@ private fun LoginPasswordField(
                 )
 
                 Box(
-                    modifier = Modifier.padding(end = 12.dp), // mr-3
+                    modifier = Modifier.padding(end = 12.dp),
                     contentAlignment = Alignment.Center,
                 ) {
                     IconButton(
@@ -914,15 +828,15 @@ private fun RememberMeCheckbox(
                 role = Role.Checkbox,
                 onValueChange = onCheckedChange,
             )
-            .padding(vertical = OneRouteSpacing.SpaceXs) // py-1
+            .padding(vertical = OneRouteSpacing.SpaceXs)
             .semantics { contentDescription = label },
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(OneRouteSpacing.SpaceSm), // gap-2
+        horizontalArrangement = Arrangement.spacedBy(OneRouteSpacing.SpaceSm),
     ) {
         Box(
             modifier = Modifier
-                .size(20.dp) // w-5 h-5
-                .clip(RoundedCornerShape(OneRouteRadius.Medium)) // rounded
+                .size(20.dp)
+                .clip(RoundedCornerShape(OneRouteRadius.Medium))
                 .background(
                     if (checked) {
                         MaterialTheme.colorScheme.primary
@@ -966,26 +880,20 @@ private fun ForgotPasswordButton(
         color = MaterialTheme.colorScheme.primary,
         maxLines = 1,
         modifier = modifier
-            .clip(CircleShape) // rounded-full
+            .clip(CircleShape)
             .clickable(
                 role = Role.Button,
                 onClickLabel = label,
                 onClick = onClick,
             )
             .padding(
-                horizontal = OneRouteSpacing.SpaceSm, // px-2
-                vertical = OneRouteSpacing.SpaceXs, // py-1
+                horizontal = OneRouteSpacing.SpaceSm,
+                vertical = OneRouteSpacing.SpaceXs,
             ),
     )
 }
 
-/**
- * Full-width 48dp full-pill primary action.
- *
- * The mock rests on `bg-primary-container` with `on-primary` content and swaps
- * to `bg-primary` on hover, so [SignInSubmitState] only borrows `primary` for the
- * in-flight and success states, where a solid fill reads better.
- */
+/** Full-width 48dp full-pill primary action. */
 @Composable
 private fun LoginSubmitButton(
     submitState: SignInSubmitState,
@@ -1010,7 +918,7 @@ private fun LoginSubmitButton(
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(
-        targetValue = if (isPressed && enabled) 0.98f else 1f, // active:scale-[0.98]
+        targetValue = if (isPressed && enabled) 0.98f else 1f,
         label = "loginSubmitScale",
     )
 
@@ -1018,19 +926,19 @@ private fun LoginSubmitButton(
         onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
-            .height(48.dp) // h-12
+            .height(48.dp)
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
             },
         enabled = enabled,
-        shape = CircleShape, // rounded-full
+        shape = CircleShape,
         colors = ButtonDefaults.buttonColors(
             containerColor = containerColor,
             contentColor = contentColor,
         ),
         elevation = ButtonDefaults.buttonElevation(
-            defaultElevation = OneRouteElevation.Active, // shadow-md
+            defaultElevation = OneRouteElevation.Active,
             pressedElevation = OneRouteElevation.Resting,
         ),
         interactionSource = interactionSource,
@@ -1044,7 +952,7 @@ private fun LoginSubmitButton(
                         fontWeight = FontWeight.SemiBold,
                     ),
                 )
-                Spacer(Modifier.width(OneRouteSpacing.SpaceXs)) // gap-space-xs
+                Spacer(Modifier.width(OneRouteSpacing.SpaceXs))
                 Icon(
                     imageVector = OneRouteIcons.ArrowForward,
                     contentDescription = null,
@@ -1085,10 +993,7 @@ private fun LoginSubmitButton(
     }
 }
 
-/**
- * "Ingreso biométrico" chip. The mock squashes it to 95% for 180ms on tap,
- * which is reproduced here with a press-driven scale.
- */
+/** "Ingreso biométrico" chip. The mock squashes it to 95% for 180ms on tap, which is reproduced here with a press-driven scale. */
 @Composable
 private fun BiometricButton(
     onClick: () -> Unit,
@@ -1131,7 +1036,6 @@ private fun BiometricButton(
                 onClick = onClick,
             )
             .semantics { contentDescription = description }
-            // px-space-lg py-2.5
             .padding(
                 horizontal = OneRouteSpacing.SpaceLg,
                 vertical = 10.dp,
@@ -1163,7 +1067,7 @@ private fun OrSeparator(
     Row(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(OneRouteSpacing.SpaceMd), // gap-space-md
+        horizontalArrangement = Arrangement.spacedBy(OneRouteSpacing.SpaceMd),
     ) {
         HorizontalDivider(
             modifier = Modifier.weight(1f),
@@ -1174,7 +1078,7 @@ private fun OrSeparator(
             text = stringResource(R.string.login_separator),
             style = MaterialTheme.typography.labelSmall.copy(
                 fontWeight = FontWeight.Medium,
-                letterSpacing = 0.35.sp, // tracking-wide
+                letterSpacing = 0.35.sp,
             ),
             color = MaterialTheme.colorScheme.outline,
         )
@@ -1207,7 +1111,7 @@ private fun GoogleSignInButton(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(48.dp) // h-12
+            .height(48.dp)
             .clip(CircleShape)
             .background(containerColor)
             .clickable(
@@ -1226,9 +1130,9 @@ private fun GoogleSignInButton(
             // Unspecified keeps the mark's own four brand colours: a tint would
             // flatten them into a single colour filter.
             tint = Color.Unspecified,
-            modifier = Modifier.size(20.dp), // w-5 h-5
+            modifier = Modifier.size(20.dp),
         )
-        Spacer(Modifier.width(12.dp)) // gap-3
+        Spacer(Modifier.width(12.dp))
         Text(
             text = label,
             style = MaterialTheme.typography.labelLarge.copy(

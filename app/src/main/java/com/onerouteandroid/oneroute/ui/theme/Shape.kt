@@ -5,21 +5,16 @@ import androidx.compose.material3.Shapes
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
-/**
- * Corner radii, spacing steps and elevation tokens for OneRoute.
- *
- * Sources: the `rounded` and `spacing` blocks plus the "Layout & Spacing",
- * "Elevation & Depth" and "Shapes" sections of `specs/ui/DESIGN.md`.
- */
+/** Corner radii, spacing steps and elevation tokens. Source: `specs/ui/DESIGN.md`. */
 val OneRouteShapes = Shapes(
-    // Small component: badge overlays, vehicle markers, notification counters.
+    // Small component: badges, vehicle markers, counters.
     extraSmall = RoundedCornerShape(OneRouteRadius.Small),
     small = RoundedCornerShape(OneRouteRadius.Small),
-    // Medium container: text fields, dialogs, dropdown menus, vehicle cards.
+    // Medium container: text fields, dialogs, dropdowns, vehicle cards.
     medium = RoundedCornerShape(OneRouteRadius.Medium),
-    // Large container: ride cards, modal bottom sheets, floating route panels.
+    // Large container: ride cards, bottom sheets, route panels.
     large = RoundedCornerShape(OneRouteRadius.Large),
-    // Card / banner container (the mock's `rounded-lg`, 32px).
+    // Card / banner container.
     extraLarge = RoundedCornerShape(OneRouteRadius.Card),
 )
 
@@ -41,14 +36,7 @@ object OneRouteSpacing {
     val MarginDesktop = 24.dp
 }
 
-/**
- * Named corner radii.
- *
- * The values above 24dp come from the Tailwind `borderRadius` overrides used by
- * the HTML mock-ups (`rounded-lg` = 2rem, `rounded-xl` = 3rem), while the field
- * and checkbox radii come from the explicit `rounded-[12px]` / `rounded-[6px]`
- * utilities on those elements. Full-pill shapes use `CircleShape` directly.
- */
+/** Named corner radii. Full-pill shapes use `CircleShape` directly. */
 object OneRouteRadius {
     /** Small component — 8dp. */
     val Small = 8.dp
@@ -73,9 +61,8 @@ object OneRouteRadius {
 }
 
 /**
- * Material 3 replaces drop shadows with tinted ambient layers, so the shadow
- * colours are the token — not the elevation alone. These values mirror the
- * `rgba(15, 23, 42, …)` shadow tints declared in DESIGN.md.
+ * Material 3 tints ambient layers instead of dropping shadows, so the shadow
+ * colours are the token — not the elevation alone.
  */
 object OneRouteElevation {
     /** Level 0 — flat canvas. */

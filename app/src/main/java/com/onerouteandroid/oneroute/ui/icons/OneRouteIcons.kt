@@ -8,15 +8,11 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 /**
- * Curated OneRoute icon set.
+ * Curated OneRoute icon set: the exact Material Symbols Rounded outlines used by
+ * the mock-ups in `specs/ui/`, inlined as 24dp / 24-unit [ImageVector]s.
  *
- * The project deliberately does **not** depend on `androidx.compose.material:material-icons-core`
- * / `-extended` (they are not part of the dependency graph and the extended artifact is ~50 MB of
- * vectors for the handful of glyphs this app needs). Instead the exact Material Symbols Rounded
- * outlines used by the mock-ups in `specs/ui/` are inlined here as 24dp / 24-unit
- * [ImageVector]s. They render identically to the web glyphs and add no build cost.
- *
- * Material Symbols are licensed under the Apache License 2.0.
+ * Inlined on purpose — `material-icons-extended` is ~50 MB for the handful of
+ * glyphs this app needs. Material Symbols are licensed under Apache 2.0.
  */
 object OneRouteIcons {
 
@@ -235,10 +231,8 @@ object OneRouteIcons {
     }
 
     /**
-     * The Google "G" mark, reproduced from the four-path SVG in
-     * `specs/ui/login_screen.html`. Unlike the rest of the set this vector is
-     * deliberately multi-coloured, so each arm keeps its own fill and the mark
-     * is never tinted by the caller's `Icon` colour.
+     * The Google "G" mark. Deliberately multi-coloured, so each arm keeps its
+     * own fill and the mark is never tinted by the caller's `Icon` colour.
      */
     val GoogleLogo: ImageVector by lazy {
         ImageVector.Builder(
@@ -1112,11 +1106,9 @@ object OneRouteIcons {
     }
 
     /**
-     * `lock_reset` — glyph of the "Seguridad y Cuenta" tonal chip.
-     *
-     * Built from two bands rather than shipped as one opaque glyph: an open
-     * reset ring in the lower left and a padlock in the upper right, so the
-     * mark still reads as "reset this lock" at the 15dp size the chip uses.
+     * `lock_reset` — glyph of the "Seguridad y Cuenta" tonal chip. Two bands
+     * rather than one opaque glyph: an open reset ring and an upper-right
+     * padlock, so it still reads as "reset this lock" at 15dp.
      */
     val LockReset: ImageVector by lazy {
         imageVector("OneRoute.LockReset") {
@@ -1451,8 +1443,8 @@ object OneRouteIcons {
 /**
  * Builds a 24dp / 24-unit single-path [ImageVector].
  *
- * `buildVector` is an experimental API whose annotations are not inherited by
- * this non-composable factory, so [ImageVector.Builder] is used directly.
+ * Uses [ImageVector.Builder] directly: `buildVector` is experimental and its
+ * annotations are not inherited by this non-composable factory.
  */
 private inline fun imageVector(
     name: String,

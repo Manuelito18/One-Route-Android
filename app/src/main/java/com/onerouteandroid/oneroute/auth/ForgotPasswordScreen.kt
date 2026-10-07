@@ -101,34 +101,6 @@ import com.onerouteandroid.oneroute.ui.theme.OneRouteSpacing
 import com.onerouteandroid.oneroute.ui.theme.OneRouteType
 import kotlinx.coroutines.delay
 
-/*
- * =============================================================================
- *  Password recovery — "¿Olvidaste tu contraseña?"
- * =============================================================================
- *  Compose port of `specs/ui/recuperar_contrasena_screen.html`, built exclusively
- *  on the tokens declared in `specs/ui/DESIGN.md`.
- *
- *  Scope: presentation and local interaction only. Nothing here talks to a
- *  backend, persists a draft or sends an e-mail — the "Enviar código OTP" tap
- *  only drives the button's loading → confirmation micro-interaction that the
- *  mock implements with a 900 ms `setTimeout`.
- *
- *  Layering:
- *   • [ForgotPasswordUiState]  – one immutable snapshot of everything needed to
- *                                draw a frame: the contact value for the active
- *                                method, focus, validation feedback and the
- *                                status of the primary action.
- *   • [ForgotPasswordScreenContent] – stateless and fully hoisted. It takes that
- *                                state plus one callback per user intent, so it
- *                                renders from a @Preview, a test or any other
- *                                destination without extra wiring.
- *   • [ForgotPasswordScreen]   – stateful container that owns the in-memory
- *                                state, runs the field validation and drives the
- *                                "Enviar código OTP → Enviando… → ¡Código
- *                                enviado!" feedback loop.
- * =============================================================================
- */
-
 // ---------------------------------------------------------------------------
 // State model
 // ---------------------------------------------------------------------------
@@ -139,21 +111,13 @@ enum class RecoveryMethod { Email, Sms }
 /** Minimum digits accepted in the phone field, ignoring spacing characters. */
 private const val MinPhoneDigits = 10
 
-/**
- * Character count after which the mock reveals the trailing confirmation tick
- * (`val.trim().length >= 5` in `validateInput`).
- */
+/** Contact length after which the trailing confirmation tick appears. */
 private const val MinContactLength = 5
 
 /** Length in characters accepted in the e-mail field. */
 private val EmailRegex = Regex("^[A-Za-z0-9._%+\\-]+@[A-Za-z0-9.\\-]+\\.[A-Za-z]{2,}$")
 
-/**
- * Everything [ForgotPasswordScreenContent] needs in order to render one frame.
- *
- * Free of `Context`, callbacks and coroutine scopes by design: a preview or a
- * unit test can build one from a literal and assert on it directly.
- */
+/** Everything [ForgotPasswordScreenContent] needs in order to render one frame. */
 @Immutable
 data class ForgotPasswordUiState(
     // --- text fields ---
@@ -218,12 +182,7 @@ private data class ForgotPasswordErrorCopy(
     val phone: String,
 )
 
-/**
- * Validates only the field the active method is bound to, mirroring the mock,
- * which only ever surfaces the error of the field on screen.
- *
- * Pure: no `Context`, no coroutines, directly unit-testable.
- */
+/** Validates only the field bound to the active method. Pure: no `Context`, no coroutines. */
 private fun validateContact(
     state: ForgotPasswordUiState,
     copy: ForgotPasswordErrorCopy,
@@ -245,19 +204,7 @@ private fun validateContact(
 // Container
 // ---------------------------------------------------------------------------
 
-/**
- * Stateful entry point for the password-recovery screen.
- *
- * Owns the in-memory [ForgotPasswordUiState] so the screen is interactive the
- * moment it is shown: the field accepts text, the method selector switches
- * between e-mail and SMS (re-labelling the field, its icon and its helper),
- * the primary action validates before playing the "Enviando código… / ¡Código
- * enviado!" feedback loop, and both the top app bar back button and the
- * "¿Recordaste tu contraseña?" link report their intent through a callback.
- *
- * @param onNavigateBack invoked from the top app bar back button.
- * @param onNavigateToLogin invoked when the user taps "Iniciar sesión".
- */
+/** Stateful entry point for the password-recovery screen. */
 @Composable
 fun ForgotPasswordScreen(
     modifier: Modifier = Modifier,
@@ -325,14 +272,7 @@ private const val SubmitIndicatorDurationMillis = 900L
 // Stateless content
 // ---------------------------------------------------------------------------
 
-/**
- * Stateless, fully hoisted password-recovery screen.
- *
- * Renders [state] and reports every user intent through its callbacks. It owns
- * no state beyond transient interaction feedback (press scaling, animated
- * colours, the ambient pulse and the label float), so a [ForgotPasswordUiState]
- * literal is all a preview or a Compose test needs.
- */
+/** Stateless, fully hoisted password-recovery screen. */
 @Composable
 fun ForgotPasswordScreenContent(
     state: ForgotPasswordUiState,
@@ -368,15 +308,14 @@ fun ForgotPasswordScreenContent(
                 .imePadding()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = OneRouteSpacing.Margin)
-                // The mock's `pb-12` on <main> plus `pb-space-xl` on the content.
                 .padding(bottom = 48.dp + OneRouteSpacing.SpaceXl),
         ) {
             RecoveryHeroSection(
                 method = state.method,
-                modifier = Modifier.padding(top = OneRouteSpacing.SpaceSm), // mt-2
+                modifier = Modifier.padding(top = OneRouteSpacing.SpaceSm),
             )
 
-            Spacer(Modifier.height(OneRouteSpacing.SpaceLg)) // mb-space-lg
+            Spacer(Modifier.height(OneRouteSpacing.SpaceLg))
 
             MethodSelector(
                 state = state,
@@ -408,7 +347,7 @@ fun ForgotPasswordScreenContent(
                 onClick = onSubmitClick,
             )
 
-            Spacer(Modifier.height(OneRouteSpacing.SpaceXs)) // pt-space-xs
+            Spacer(Modifier.height(OneRouteSpacing.SpaceXs))
 
             LoginRedirection(onNavigateToLogin = onNavigateToLogin)
         }
@@ -430,14 +369,12 @@ private fun ForgotPasswordTopBar(
 ) {
     Surface(
         modifier = modifier.fillMaxWidth(),
-        // `bg-surface/85 backdrop-blur-xl`. Compose has no stable backdrop blur,
-        // so the translucent plane plus a hairline shadow stand in for it.
+        // Translucent plane stands in for the mock's backdrop blur.
         color = MaterialTheme.colorScheme.surface.copy(alpha = 0.85f),
         shadowElevation = OneRouteElevation.Resting,
     ) {
         Column {
-            // The 24dp native status-bar strip; the OS clock and system icons
-            // are drawn by the platform, not by the app.
+            // Native status-bar strip drawn by the platform.
             Spacer(
                 Modifier
                     .fillMaxWidth()
@@ -446,14 +383,14 @@ private fun ForgotPasswordTopBar(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(64.dp) // h-16
-                    .padding(horizontal = OneRouteSpacing.SpaceSm) // px-space-xs
+                    .height(64.dp)
+                    .padding(horizontal = OneRouteSpacing.SpaceSm)
                     .consumeWindowInsets(WindowInsets.statusBars),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 IconButton(
                     onClick = onBackClick,
-                    modifier = Modifier.size(44.dp), // w-11 h-11
+                    modifier = Modifier.size(44.dp),
                     colors = IconButtonDefaults.iconButtonColors(
                         containerColor = Color.Transparent,
                         contentColor = MaterialTheme.colorScheme.onSurface,
@@ -487,11 +424,7 @@ private fun ForgotPasswordTopBar(
     }
 }
 
-/**
- * Local stand-in for the remote brand mark in the mock: a primary disc with a
- * white route glyph, so the header keeps its visual weight without pulling in
- * an image loader for a static asset.
- */
+/** Primary disc with a route glyph, standing in for the remote brand mark. */
 @Composable
 private fun BrandMark(
     contentDescription: String,
@@ -499,7 +432,7 @@ private fun BrandMark(
 ) {
     Box(
         modifier = modifier
-            .size(32.dp) // h-8
+            .size(32.dp)
             .clip(CircleShape)
             .background(MaterialTheme.colorScheme.primary)
             .semantics { this.contentDescription = contentDescription },
@@ -521,7 +454,7 @@ private fun ProfileAvatar(
 ) {
     Box(
         modifier = modifier
-            .size(32.dp) // w-8 h-8
+            .size(32.dp)
             .clip(CircleShape)
             .background(MaterialTheme.colorScheme.surfaceContainerHigh)
             .semantics { this.contentDescription = contentDescription },
@@ -551,11 +484,11 @@ private fun RecoveryHeroSection(
     ) {
         SecurityBadge()
 
-        Spacer(Modifier.height(OneRouteSpacing.SpaceMd)) // mb-space-md
+        Spacer(Modifier.height(OneRouteSpacing.SpaceMd))
 
         LockIllustration(method = method)
 
-        Spacer(Modifier.height(OneRouteSpacing.SpaceMd)) // mb-space-md
+        Spacer(Modifier.height(OneRouteSpacing.SpaceMd))
 
         Text(
             text = stringResource(R.string.forgot_title),
@@ -564,13 +497,12 @@ private fun RecoveryHeroSection(
             textAlign = TextAlign.Center,
         )
 
-        Spacer(Modifier.height(OneRouteSpacing.SpaceXs)) // mb-space-xs
+        Spacer(Modifier.height(OneRouteSpacing.SpaceXs))
 
         Text(
             text = stringResource(R.string.forgot_subtitle),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            // `max-w-[340px]` keeps the copy wrapping as approved.
             modifier = Modifier.width(340.dp),
             textAlign = TextAlign.Center,
         )
@@ -585,15 +517,15 @@ private fun SecurityBadge(modifier: Modifier = Modifier) {
         color = MaterialTheme.colorScheme.secondaryContainer,
         contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
         shape = CircleShape,
-        shadowElevation = OneRouteElevation.Resting, // shadow-sm
+        shadowElevation = OneRouteElevation.Resting,
     ) {
         Row(
             modifier = Modifier.padding(
-                horizontal = 12.dp, // px-3
-                vertical = 4.dp, // py-1
+                horizontal = 12.dp,
+                vertical = 4.dp,
             ),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp), // gap-1.5
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             Icon(
                 imageVector = OneRouteIcons.LockReset,
@@ -608,11 +540,7 @@ private fun SecurityBadge(modifier: Modifier = Modifier) {
     }
 }
 
-/**
- * 96dp ambient container holding the three concentric discs of the mock, the
- * 28dp shield badge anchored to its lower right, and the hero glyph whose
- * identity — and micro "unlock" wobble — follow the active [method].
- */
+/** Concentric-disc illustration; the hero glyph and its wobble follow [method]. */
 @Composable
 private fun LockIllustration(
     method: RecoveryMethod,
@@ -630,8 +558,7 @@ private fun LockIllustration(
         label = "heroGlowAlpha",
     )
 
-    // The mock nudges the glyph 12° on every method switch. The first
-    // composition is skipped so the illustration does not wobble on entry.
+    // 12° nudge on every switch; skipped on first composition.
     val wobble = remember { Animatable(0f) }
     var hasRenderedOnce by remember { mutableStateOf(false) }
     LaunchedEffect(method) {
@@ -649,11 +576,11 @@ private fun LockIllustration(
 
     Box(
         modifier = modifier
-            .size(96.dp) // w-24 h-24
+            .size(96.dp)
             .semantics { contentDescription = heroDescription },
         contentAlignment = Alignment.Center,
     ) {
-        // Fallback wash for API levels where `Modifier.blur` is a no-op.
+        // Fallback wash for APIs where `Modifier.blur` is a no-op.
         Box(
             modifier = Modifier
                 .size(96.dp)
@@ -669,19 +596,16 @@ private fun LockIllustration(
                 .clip(CircleShape)
                 .background(OneRoutePrimaryFixedDim.copy(alpha = glowAlpha)),
         )
-
-        // `w-20 h-20 bg-secondary-container` outer disc.
         Surface(
             modifier = Modifier.size(80.dp),
             shape = CircleShape,
             color = MaterialTheme.colorScheme.secondaryContainer,
-            shadowElevation = OneRouteElevation.Active, // shadow-md
+            shadowElevation = OneRouteElevation.Active,
         ) {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center,
             ) {
-                // `w-14 h-14 bg-primary-container` inner disc.
                 Box(
                     modifier = Modifier
                         .size(56.dp)
@@ -703,13 +627,11 @@ private fun LockIllustration(
                 }
             }
         }
-
-        // Floating shield tag at `-bottom-1 -right-1`.
         Surface(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .offset(x = 4.dp, y = 4.dp) // -bottom-1 -right-1
-                .size(28.dp) // w-7 h-7
+                .offset(x = 4.dp, y = 4.dp)
+                .size(28.dp)
                 .semantics { contentDescription = shieldDescription },
             shape = CircleShape,
             color = MaterialTheme.colorScheme.surfaceContainerLowest,
@@ -743,7 +665,7 @@ private fun MethodSelector(
         modifier = modifier
             .fillMaxWidth()
             .semantics { contentDescription = groupDescription },
-        verticalArrangement = Arrangement.spacedBy(OneRouteSpacing.SpaceSm), // gap-space-sm
+        verticalArrangement = Arrangement.spacedBy(OneRouteSpacing.SpaceSm),
     ) {
         RecoveryMethodCard(
             method = RecoveryMethod.Email,
@@ -765,10 +687,7 @@ private fun MethodSelector(
     }
 }
 
-/**
- * One 16dp-radius option row: a 44dp tinted icon disc, the two-line copy, and
- * the 24dp radio that reflects the selection.
- */
+/** One 16dp-radius option row: a 44dp tinted icon disc, the two-line copy, and the 24dp radio that reflects the selection. */
 @Composable
 private fun RecoveryMethodCard(
     method: RecoveryMethod,
@@ -779,7 +698,7 @@ private fun RecoveryMethodCard(
     onSelect: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val shape = RoundedCornerShape(OneRouteRadius.Medium) // rounded-DEFAULT
+    val shape = RoundedCornerShape(OneRouteRadius.Medium)
 
     val containerColor by animateColorAsState(
         targetValue = if (isSelected) {
@@ -816,15 +735,15 @@ private fun RecoveryMethodCard(
             ),
         shape = shape,
         color = containerColor,
-        shadowElevation = OneRouteElevation.Resting, // shadow-sm
+        shadowElevation = OneRouteElevation.Resting,
     ) {
         Row(
-            modifier = Modifier.padding(OneRouteSpacing.SpaceMd), // p-space-md
+            modifier = Modifier.padding(OneRouteSpacing.SpaceMd),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Box(
                 modifier = Modifier
-                    .size(44.dp) // w-11 h-11
+                    .size(44.dp)
                     .clip(CircleShape)
                     .background(iconContainerColor),
                 contentAlignment = Alignment.Center,
@@ -840,7 +759,7 @@ private fun RecoveryMethodCard(
                 )
             }
 
-            Spacer(Modifier.width(OneRouteSpacing.SpaceMd)) // gap-space-md
+            Spacer(Modifier.width(OneRouteSpacing.SpaceMd))
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
@@ -861,7 +780,7 @@ private fun RecoveryMethodCard(
                 )
             }
 
-            Spacer(Modifier.width(OneRouteSpacing.SpaceSm)) // pl-2
+            Spacer(Modifier.width(OneRouteSpacing.SpaceSm))
 
             RecoveryRadio(isSelected = isSelected)
         }
@@ -898,14 +817,14 @@ private fun RecoveryRadio(
 
     Box(
         modifier = modifier
-            .size(24.dp) // w-6 h-6
+            .size(24.dp)
             .clip(CircleShape)
             .background(trackColor),
         contentAlignment = Alignment.Center,
     ) {
         Box(
             modifier = Modifier
-                .size(10.dp) // w-2.5 h-2.5
+                .size(10.dp)
                 .graphicsLayer {
                     scaleX = dotScale
                     scaleY = dotScale
@@ -920,11 +839,7 @@ private fun RecoveryRadio(
 // Contact field
 // ---------------------------------------------------------------------------
 
-/**
- * The single 56dp input of the screen. Its label, leading icon, keyboard type
- * and helper copy all follow the active [ForgotPasswordUiState.method], which
- * is what makes the two option cards feel like they drive the form.
- */
+/** The screen's single input; label, icon, keyboard and helper follow [ForgotPasswordUiState.method]. */
 @Composable
 private fun ContactField(
     state: ForgotPasswordUiState,
@@ -979,17 +894,7 @@ private fun ContactField(
     )
 }
 
-/**
- * One 16dp white plane carrying a floating label, a leading icon, an optional
- * trailing confirmation tick and a helper line underneath.
- *
- * Built on [BasicTextField] rather than Material's `TextField` on purpose: the
- * mock asks for a borderless plane whose shadow steps from Level 1 to Level 2
- * on focus, a label that floats *over* the top edge, and a helper line inset
- * 12dp from the field edge rather than from the text column. None of that is
- * reachable through Material's slots, and a `TextField` cannot cast the tinted
- * shadow because it owns its own background.
- */
+/** 16dp plane with a floating label, leading icon, optional tick and helper line. */
 @Composable
 private fun RecoveryTextField(
     value: String,
@@ -1006,14 +911,14 @@ private fun RecoveryTextField(
     keyboardActions: KeyboardActions,
     modifier: Modifier = Modifier,
 ) {
-    val shape = RoundedCornerShape(OneRouteRadius.Medium) // rounded-DEFAULT
+    val shape = RoundedCornerShape(OneRouteRadius.Medium)
     val onSurface = MaterialTheme.colorScheme.onSurface
     val onSurfaceVariant = MaterialTheme.colorScheme.onSurfaceVariant
     val primary = MaterialTheme.colorScheme.primary
     val error = MaterialTheme.colorScheme.error
 
     // The label floats as soon as the field holds a value or has focus, exactly
-    // like the mock's `peer-placeholder-shown` / `peer-focus` peer selectors.
+
     val labelFloated = isFocused || value.isNotEmpty()
 
     val shadowElevation by animateDpAsState(
@@ -1038,7 +943,7 @@ private fun RecoveryTextField(
         label = "fieldLabelColor",
     )
     val labelScale by animateFloatAsState(
-        targetValue = if (labelFloated) 0.8f else 1f, // scale-[0.8]
+        targetValue = if (labelFloated) 0.8f else 1f,
         animationSpec = tween(180),
         label = "fieldLabelScale",
     )
@@ -1064,7 +969,7 @@ private fun RecoveryTextField(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(ContactFieldHeight) // h-14
+                .height(ContactFieldHeight)
                 .shadow(
                     elevation = shadowElevation,
                     shape = shape,
@@ -1088,11 +993,11 @@ private fun RecoveryTextField(
                     contentDescription = null,
                     tint = primary,
                     modifier = Modifier
-                        .padding(start = LeadingStartInset) // left-4
-                        .size(LeadingIconSize), // text-[22px]
+                        .padding(start = LeadingStartInset)
+                        .size(LeadingIconSize),
                 )
 
-                Spacer(Modifier.width(LeadingGap)) // mr-3
+                Spacer(Modifier.width(LeadingGap))
 
                 Box(
                     modifier = Modifier
@@ -1106,7 +1011,6 @@ private fun RecoveryTextField(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(end = OneRouteSpacing.SpaceMd)
-                            // pt-4 pb-1
                             .padding(top = 16.dp, bottom = 4.dp),
                         enabled = true,
                         readOnly = false,
@@ -1170,7 +1074,7 @@ private fun RecoveryTextField(
                         contentDescription = null,
                         tint = primary,
                         modifier = Modifier
-                            .padding(end = TrailingEndInset) // right-3.5
+                            .padding(end = TrailingEndInset)
                             .size(20.dp),
                     )
                 }
@@ -1182,7 +1086,7 @@ private fun RecoveryTextField(
             color = helperColor,
             icon = helperIcon,
             iconContentDescription = helperIconDescription,
-            modifier = Modifier.padding(top = 6.dp, start = 12.dp, end = 12.dp), // pt-1.5 px-3
+            modifier = Modifier.padding(top = 6.dp, start = 12.dp, end = 12.dp),
         )
     }
 }
@@ -1213,7 +1117,7 @@ private fun FieldHelperLine(
     Row(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp), // gap-1.5
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         Icon(
             imageVector = icon,
@@ -1233,12 +1137,7 @@ private fun FieldHelperLine(
 // Information / confirmation card
 // ---------------------------------------------------------------------------
 
-/**
- * The card under the form. It shows the mock's "Vigencia temporal" note while
- * the request is idle and swaps to a local confirmation of the channel the
- * code was "sent" to, so the tap on the CTA always produces visible feedback
- * without any network call.
- */
+/** The card under the form. It shows the mock's "Vigencia temporal" note while the request is idle and swaps to a local confirmation of the channel the code was "sent" to, so the tap on the CTA always produces visible... */
 @Composable
 private fun RecoveryFeedbackCard(
     state: ForgotPasswordUiState,
@@ -1272,16 +1171,16 @@ private fun ExpiryCard(modifier: Modifier = Modifier) {
     Surface(
         modifier = modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surfaceContainerLow,
-        shape = RoundedCornerShape(OneRouteRadius.Medium), // rounded-DEFAULT
-        shadowElevation = OneRouteElevation.Resting, // shadow-sm
+        shape = RoundedCornerShape(OneRouteRadius.Medium),
+        shadowElevation = OneRouteElevation.Resting,
     ) {
         Row(
-            modifier = Modifier.padding(OneRouteSpacing.SpaceMd), // p-space-md
-            verticalAlignment = Alignment.Top, // items-start
+            modifier = Modifier.padding(OneRouteSpacing.SpaceMd),
+            verticalAlignment = Alignment.Top,
         ) {
             Box(
                 modifier = Modifier
-                    .size(32.dp) // w-8 h-8
+                    .size(32.dp)
                     .clip(CircleShape)
                     .background(OneRouteSecondaryFixed),
                 contentAlignment = Alignment.Center,
@@ -1294,7 +1193,7 @@ private fun ExpiryCard(modifier: Modifier = Modifier) {
                 )
             }
 
-            Spacer(Modifier.width(12.dp)) // gap-3
+            Spacer(Modifier.width(12.dp))
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
@@ -1304,7 +1203,7 @@ private fun ExpiryCard(modifier: Modifier = Modifier) {
                     ),
                     color = MaterialTheme.colorScheme.onSurface,
                 )
-                Spacer(Modifier.height(2.dp)) // mb-0.5
+                Spacer(Modifier.height(2.dp))
                 Text(
                     text = stringResource(R.string.forgot_expiry_body),
                     style = MaterialTheme.typography.bodyMedium,
@@ -1315,10 +1214,7 @@ private fun ExpiryCard(modifier: Modifier = Modifier) {
     }
 }
 
-/**
- * Local confirmation shown once the CTA settles into its success state: a
- * tonal check plus the destination the code would have been delivered to.
- */
+/** Local confirmation shown once the CTA settles into its success state: a tonal check plus the destination the code would have been delivered to. */
 @Composable
 private fun SuccessCard(
     method: RecoveryMethod,
@@ -1334,7 +1230,7 @@ private fun SuccessCard(
     Surface(
         modifier = modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surfaceContainerLow,
-        shape = RoundedCornerShape(OneRouteRadius.Medium), // rounded-DEFAULT
+        shape = RoundedCornerShape(OneRouteRadius.Medium),
         shadowElevation = OneRouteElevation.Resting,
     ) {
         Row(
@@ -1381,11 +1277,7 @@ private fun SuccessCard(
 // Primary action
 // ---------------------------------------------------------------------------
 
-/**
- * Full-width 48dp full-pill button carrying the three states of the mock's
- * `submit-btn` micro-interaction: "Enviar código OTP" → "Enviando código…" →
- * "¡Código enviado!".
- */
+/** CTA: "Enviar código OTP" → "Enviando código…" → "¡Código enviado!". */
 @Composable
 private fun RecoverySubmitButton(
     isLoading: Boolean,
@@ -1413,7 +1305,7 @@ private fun RecoverySubmitButton(
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(
-        targetValue = if (isPressed && !isLoading) 0.99f else 1f, // active:scale-[0.99]
+        targetValue = if (isPressed && !isLoading) 0.99f else 1f,
         label = "submitScale",
     )
 
@@ -1432,20 +1324,20 @@ private fun RecoverySubmitButton(
         onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
-            .height(48.dp) // h-12
+            .height(48.dp)
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
             },
         enabled = !isLoading,
-        shape = CircleShape, // rounded-full
+        shape = CircleShape,
         colors = ButtonDefaults.buttonColors(
             containerColor = containerColor,
             contentColor = contentColor,
         ),
         elevation = ButtonDefaults.buttonElevation(
-            defaultElevation = OneRouteElevation.Active, // shadow-md
-            pressedElevation = OneRouteElevation.Resting, // active:shadow-sm
+            defaultElevation = OneRouteElevation.Active,
+            pressedElevation = OneRouteElevation.Resting,
         ),
         interactionSource = interactionSource,
         contentPadding = PaddingValues(horizontal = OneRouteSpacing.SpaceMd),
@@ -1459,7 +1351,7 @@ private fun RecoverySubmitButton(
                         .size(20.dp)
                         .rotate(spinAngle),
                 )
-                Spacer(Modifier.width(OneRouteSpacing.SpaceXs)) // gap-2
+                Spacer(Modifier.width(OneRouteSpacing.SpaceXs))
                 Text(
                     text = stringResource(R.string.forgot_submitting),
                     style = MaterialTheme.typography.labelLarge.copy(
@@ -1489,7 +1381,7 @@ private fun SubmitButtonLabel(icon: ImageVector, text: String) {
             fontWeight = FontWeight.SemiBold,
         ),
     )
-    Spacer(Modifier.width(OneRouteSpacing.SpaceXs)) // gap-2
+    Spacer(Modifier.width(OneRouteSpacing.SpaceXs))
     Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(20.dp))
 }
 
@@ -1510,7 +1402,6 @@ private fun LoginRedirection(
         contentAlignment = Alignment.Center,
     ) {
         Row(
-            // `py-2 px-4 rounded-full` — the pill around the whole tappable area.
             modifier = Modifier
                 .clip(CircleShape)
                 .clickable(
@@ -1528,7 +1419,7 @@ private fun LoginRedirection(
                 color = MaterialTheme.colorScheme.primary,
                 maxLines = 1,
             )
-            Spacer(Modifier.width(6.dp)) // ml-1.5
+            Spacer(Modifier.width(6.dp))
             Text(
                 text = actionLabel,
                 style = MaterialTheme.typography.labelLarge.copy(

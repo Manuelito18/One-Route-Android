@@ -87,31 +87,6 @@ import com.onerouteandroid.oneroute.ui.theme.OneRouteType
 import java.util.Locale
 import kotlinx.coroutines.delay
 
-/*
- * =============================================================================
- *  Two-factor verification — "Verifica tu identidad"
- * =============================================================================
- *  Compose port of `specs/ui/verificar_otp.html`, built exclusively on the
- *  tokens declared in `specs/ui/DESIGN.md`.
- *
- *  Scope: presentation and local interaction only. The resend countdown, the
- *  PIN cells and the "Verificar código" feedback loop are driven entirely in
- *  memory — no SMS, no network, no persistence.
- *
- *  Layering:
- *   • [VerifyOtpUiState]       – one immutable snapshot of everything needed to
- *                                draw a frame (the digits, the countdown, the
- *                                flags behind the CTA and both resend affordances).
- *   • [VerifyOtpScreenContent] – stateless and fully hoisted: it takes that
- *                                state plus one callback per user intent, so it
- *                                renders from a @Preview, a test or any other
- *                                destination without extra wiring.
- *   • [VerifyOtpScreen]        – stateful container that owns the in-memory
- *                                state, ticks the countdown and runs the local
- *                                verification micro-interaction.
- * =============================================================================
- */
-
 // ---------------------------------------------------------------------------
 // State model
 // ---------------------------------------------------------------------------
@@ -131,15 +106,7 @@ private const val VerifyLoadingMillis = 900L
 /** One tick of the resend countdown. */
 private const val CountdownTickMillis = 1_000L
 
-/**
- * Everything [VerifyOtpScreenContent] needs in order to render one frame.
- *
- * Free of `Context`, callbacks and coroutine scopes by design: a preview or a
- * unit test can build one from a literal and assert on it directly.
- *
- * [isCodeComplete] is only ever written where the digits are normalised, so the
- * flag can never drift from the code it describes.
- */
+/** Everything [VerifyOtpScreenContent] needs in order to render one frame. */
 @Immutable
 data class VerifyOtpUiState(
     // --- the code ---
@@ -165,11 +132,7 @@ data class VerifyOtpUiState(
     fun digitAt(index: Int): Char? = code.getOrNull(index)
 }
 
-/**
- * Returns a copy of the state with [raw] normalised to digits only and capped
- * at [VerifyOtpUiState.codeLength], keeping [VerifyOtpUiState.isCodeComplete]
- * in sync with the result.
- */
+/** Returns a copy of the state with [raw] normalised to digits only and capped at [VerifyOtpUiState.codeLength], keeping [VerifyOtpUiState.isCodeComplete] in sync with the result. */
 private fun VerifyOtpUiState.withCode(raw: String): VerifyOtpUiState {
     val digits = raw.filter(Char::isDigit).take(codeLength)
     return copy(code = digits, isCodeComplete = digits.length == codeLength)
@@ -185,20 +148,7 @@ private fun countdownText(seconds: Int): String {
 // Container
 // ---------------------------------------------------------------------------
 
-/**
- * Stateful entry point for the verification screen.
- *
- * Owns the in-memory [VerifyOtpUiState] so the screen is interactive the moment
- * it is shown: the numeric keyboard opens, the cells fill in as digits are
- * typed, the countdown reaches zero and enables both resend affordances, and
- * the primary action plays its local "Verificando…" feedback loop.
- *
- * @param destination e-mail or phone number the code was sent to.
- * @param onBackClick invoked when the user taps the top app bar back button.
- * @param onEditEmailClick invoked when the user taps "Cambiar correo".
- * @param onAccountClick invoked when the user taps the account avatar.
- * @param onMoreOptionsClick invoked when the user taps the overflow menu.
- */
+/** Stateful entry point for the verification screen. */
 @Composable
 fun VerifyOtpScreen(
     modifier: Modifier = Modifier,
@@ -254,14 +204,7 @@ fun VerifyOtpScreen(
 // Stateless content
 // ---------------------------------------------------------------------------
 
-/**
- * Stateless, fully hoisted verification screen.
- *
- * Renders [state] and reports every user intent through its callbacks. It owns
- * no state beyond transient interaction feedback (the focused field, the
- * blinking caret and press scaling), so a [VerifyOtpUiState] literal is all a
- * preview or a Compose test needs.
- */
+/** Stateless, fully hoisted verification screen. */
 @Composable
 fun VerifyOtpScreenContent(
     state: VerifyOtpUiState,
@@ -295,17 +238,16 @@ fun VerifyOtpScreenContent(
                 .imePadding()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = OneRouteSpacing.Margin)
-                // The mock's `pb-12` gesture strip plus `pb-space-xl`.
                 .padding(bottom = 48.dp + OneRouteSpacing.SpaceXl),
         ) {
             VerificationBanner(
                 destination = state.destination,
                 codeLength = state.codeLength,
                 onEditEmailClick = onEditEmailClick,
-                modifier = Modifier.padding(top = OneRouteSpacing.SpaceSm), // mt-space-sm
+                modifier = Modifier.padding(top = OneRouteSpacing.SpaceSm),
             )
 
-            Spacer(Modifier.height(OneRouteSpacing.SpaceLg)) // mb-space-lg
+            Spacer(Modifier.height(OneRouteSpacing.SpaceLg))
 
             OtpCard(
                 state = state,
@@ -313,14 +255,12 @@ fun VerifyOtpScreenContent(
                 onResendClick = onResendClick,
             )
 
-            Spacer(Modifier.height(OneRouteSpacing.SpaceLg)) // mb-space-lg
+            Spacer(Modifier.height(OneRouteSpacing.SpaceLg))
 
             ResendPrompt(
                 canResend = state.canResend,
                 onResendClick = onResendClick,
             )
-
-            // The mock spaces the microcopy from the action row by `mt-space-md`.
             Spacer(Modifier.height(OneRouteSpacing.SpaceMd))
 
             VerifyButton(
@@ -353,8 +293,7 @@ private fun VerifyOtpTopBar(
         shadowElevation = OneRouteElevation.Resting,
     ) {
         Column {
-            // The 24dp native status-bar strip; the OS clock and system icons
-            // are drawn by the platform, not by the app.
+            // Native status-bar strip drawn by the platform.
             Spacer(
                 Modifier
                     .fillMaxWidth()
@@ -363,16 +302,16 @@ private fun VerifyOtpTopBar(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(64.dp) // h-16
-                    .padding(horizontal = OneRouteSpacing.SpaceXs) // px-space-xs
-                    // `pr-space-xs` on the trailing action group.
+                    .height(64.dp)
+                    .padding(horizontal = OneRouteSpacing.SpaceXs)
+
                     .padding(end = OneRouteSpacing.SpaceXs)
                     .consumeWindowInsets(WindowInsets.statusBars),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 IconButton(
                     onClick = onBackClick,
-                    modifier = Modifier.size(44.dp), // w-11 h-11
+                    modifier = Modifier.size(44.dp),
                     colors = IconButtonDefaults.iconButtonColors(
                         containerColor = Color.Transparent,
                         contentColor = MaterialTheme.colorScheme.onSurface,
@@ -381,17 +320,16 @@ private fun VerifyOtpTopBar(
                     Icon(
                         imageVector = OneRouteIcons.ArrowBack,
                         contentDescription = stringResource(R.string.verify_otp_navigate_back),
-                        modifier = Modifier.size(24.dp), // text-[24px]
+                        modifier = Modifier.size(24.dp),
                     )
                 }
 
-                Spacer(Modifier.width(OneRouteSpacing.SpaceXs)) // gap-space-xs
+                Spacer(Modifier.width(OneRouteSpacing.SpaceXs))
 
                 BrandMark(contentDescription = stringResource(R.string.verify_otp_brand_logo))
 
-                Spacer(Modifier.width(OneRouteSpacing.SpaceSm)) // gap-space-sm
+                Spacer(Modifier.width(OneRouteSpacing.SpaceSm))
 
-                // `max-w-[200px] truncate`: the mock hard-caps the title so the
                 // trailing controls keep their slot. The weighted slot does the
                 // same job while staying safe on 360dp-wide screens.
                 Text(
@@ -405,11 +343,11 @@ private fun VerifyOtpTopBar(
 
                 AccountButton(onAccountClick = onAccountClick)
 
-                Spacer(Modifier.width(OneRouteSpacing.SpaceXs)) // gap-space-xs
+                Spacer(Modifier.width(OneRouteSpacing.SpaceXs))
 
                 IconButton(
                     onClick = onMoreOptionsClick,
-                    modifier = Modifier.size(44.dp), // w-11 h-11
+                    modifier = Modifier.size(44.dp),
                     colors = IconButtonDefaults.iconButtonColors(
                         containerColor = Color.Transparent,
                         contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -418,7 +356,7 @@ private fun VerifyOtpTopBar(
                     Icon(
                         imageVector = OneRouteIcons.MoreVert,
                         contentDescription = stringResource(R.string.verify_otp_more_options),
-                        modifier = Modifier.size(24.dp), // text-[24px]
+                        modifier = Modifier.size(24.dp),
                     )
                 }
             }
@@ -426,11 +364,7 @@ private fun VerifyOtpTopBar(
     }
 }
 
-/**
- * Local stand-in for the remote brand mark in the mock: a primary disc with a
- * white route glyph, so the header keeps its visual weight without pulling in
- * an image loader for a static asset.
- */
+/** Primary disc with a route glyph, standing in for the remote brand mark. */
 @Composable
 private fun BrandMark(
     contentDescription: String,
@@ -438,7 +372,7 @@ private fun BrandMark(
 ) {
     Box(
         modifier = modifier
-            .size(32.dp) // h-8
+            .size(32.dp)
             .clip(CircleShape)
             .background(MaterialTheme.colorScheme.primary)
             .semantics { this.contentDescription = contentDescription },
@@ -463,12 +397,12 @@ private fun AccountButton(
 
     IconButton(
         onClick = onAccountClick,
-        modifier = modifier.size(44.dp), // w-11 h-11
+        modifier = modifier.size(44.dp),
         colors = IconButtonDefaults.iconButtonColors(containerColor = Color.Transparent),
     ) {
         Box(
             modifier = Modifier
-                .size(32.dp) // w-8 h-8
+                .size(32.dp)
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                 .semantics { contentDescription = label },
@@ -500,10 +434,10 @@ private fun VerificationBanner(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Surface(
-            modifier = Modifier.size(BannerGlyphContainer), // w-16 h-16
+            modifier = Modifier.size(BannerGlyphContainer),
             shape = CircleShape,
             color = MaterialTheme.colorScheme.secondaryContainer,
-            shadowElevation = OneRouteElevation.Resting, // shadow-sm
+            shadowElevation = OneRouteElevation.Resting,
         ) {
             Box(
                 modifier = Modifier.fillMaxSize(),
@@ -513,12 +447,12 @@ private fun VerificationBanner(
                     imageVector = OneRouteIcons.MarkEmailRead,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(32.dp), // text-[32px]
+                    modifier = Modifier.size(32.dp),
                 )
             }
         }
 
-        Spacer(Modifier.height(OneRouteSpacing.SpaceMd)) // mb-space-md
+        Spacer(Modifier.height(OneRouteSpacing.SpaceMd))
 
         Text(
             text = stringResource(R.string.verify_otp_hero_title),
@@ -527,12 +461,12 @@ private fun VerificationBanner(
             textAlign = TextAlign.Center,
         )
 
-        Spacer(Modifier.height(OneRouteSpacing.SpaceXs)) // mb-space-xs
+        Spacer(Modifier.height(OneRouteSpacing.SpaceXs))
 
         val sentTo = stringResource(R.string.verify_otp_hero_body, codeLength)
         Text(
             // "Hemos enviado un código de N dígitos a " + the destination in
-            // `font-medium text-on-surface`, exactly like the mock's <span>.
+
             text = buildAnnotatedString {
                 append(sentTo)
                 append(' ')
@@ -548,10 +482,10 @@ private fun VerificationBanner(
             style = MaterialTheme.typography.bodyMedium, // body-md
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
-            modifier = Modifier.widthIn(max = BannerTextMaxWidth), // max-w-[320px]
+            modifier = Modifier.widthIn(max = BannerTextMaxWidth),
         )
 
-        Spacer(Modifier.height(OneRouteSpacing.SpaceXs)) // mt-space-xs
+        Spacer(Modifier.height(OneRouteSpacing.SpaceXs))
 
         ChangeEmailAction(onEditEmailClick = onEditEmailClick)
     }
@@ -572,18 +506,18 @@ private fun ChangeEmailAction(
             onClick = onEditEmailClick,
         ),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp), // gap-1
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.labelLarge, // label-lg
+            style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.primary,
         )
         Icon(
             imageVector = OneRouteIcons.Edit,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(16.dp), // text-[16px]
+            modifier = Modifier.size(16.dp),
         )
     }
 }
@@ -602,10 +536,10 @@ private fun OtpCard(
     Surface(
         modifier = modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surfaceContainerLow,
-        shape = RoundedCornerShape(OneRouteRadius.Card), // rounded-lg
-        shadowElevation = OneRouteElevation.Resting, // shadow-sm
+        shape = RoundedCornerShape(OneRouteRadius.Card),
+        shadowElevation = OneRouteElevation.Resting,
     ) {
-        Column(modifier = Modifier.padding(OneRouteSpacing.SpaceMd)) { // p-space-md
+        Column(modifier = Modifier.padding(OneRouteSpacing.SpaceMd)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -613,21 +547,19 @@ private fun OtpCard(
             ) {
                 Text(
                     text = stringResource(R.string.verify_otp_card_label),
-                    style = MaterialTheme.typography.labelLarge, // label-lg
+                    style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 TlsBadge()
             }
 
-            Spacer(Modifier.height(OneRouteSpacing.SpaceSm)) // mb-space-sm
+            Spacer(Modifier.height(OneRouteSpacing.SpaceSm))
 
             OtpInput(
                 state = state,
                 onCodeChange = onCodeChange,
-                modifier = Modifier.padding(vertical = OneRouteSpacing.SpaceXs), // my-space-xs
+                modifier = Modifier.padding(vertical = OneRouteSpacing.SpaceXs),
             )
-
-            // `mt-space-md pt-space-xs` on the countdown row.
             Spacer(Modifier.height(OneRouteSpacing.SpaceMd + OneRouteSpacing.SpaceXs))
 
             ResendRow(
@@ -644,17 +576,17 @@ private fun OtpCard(
 private fun TlsBadge(modifier: Modifier = Modifier) {
     Row(
         modifier = modifier
-            .clip(CircleShape) // rounded-full
+            .clip(CircleShape)
             .background(MaterialTheme.colorScheme.primaryFixed)
-            .padding(horizontal = 8.dp, vertical = 2.dp), // px-2 py-0.5
+            .padding(horizontal = 8.dp, vertical = 2.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp), // gap-1
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         Icon(
             imageVector = OneRouteIcons.Shield,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(14.dp), // text-[14px]
+            modifier = Modifier.size(14.dp),
         )
         Text(
             text = stringResource(R.string.verify_otp_card_tls),
@@ -670,15 +602,7 @@ private fun TlsBadge(modifier: Modifier = Modifier) {
 // PIN cells
 // ---------------------------------------------------------------------------
 
-/**
- * The cells of the mock plus the transparent field that drives them.
- *
- * A single [BasicTextField] spans the whole grid so typing stays sequential and
- * fluid — digits land in order, backspace removes the last one — while the
- * field itself paints nothing: the cells below are the visible representation
- * of the code, and the field only owns focus, the numeric keyboard and the
- * semantics a screen reader needs.
- */
+/** The cells of the mock plus the transparent field that drives them. */
 @Composable
 private fun OtpInput(
     state: VerifyOtpUiState,
@@ -734,7 +658,7 @@ private fun OtpCell(
     isActive: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val shape = RoundedCornerShape(OneRouteRadius.Medium) // rounded-2xl → 1rem
+    val shape = RoundedCornerShape(OneRouteRadius.Medium)
     val primary = MaterialTheme.colorScheme.primary
 
     val container = when {
@@ -745,8 +669,8 @@ private fun OtpCell(
 
     Box(
         modifier = modifier
-            .width(OtpCellWidth) // w-12
-            .height(OtpCellHeight) // h-14
+            .width(OtpCellWidth)
+            .height(OtpCellHeight)
             // The mock adds `shadow-inner` to the filled cells; Compose has no
             // inner-shadow primitive, so the tonal step carries the depth.
             .clip(shape)
@@ -772,10 +696,7 @@ private fun OtpCell(
     }
 }
 
-/**
- * The `w-0.5 h-6` blinking bar of the focused cell. The mock pings it; a
- * reversing alpha ramp is the Compose equivalent that survives on API 29.
- */
+/** The `w-0.5 h-6` blinking bar of the focused cell. The mock pings it; a reversing alpha ramp is the Compose equivalent that survives on API 29. */
 @Composable
 private fun OtpCaret(modifier: Modifier = Modifier) {
     val transition = rememberInfiniteTransition(label = "otpCaret")
@@ -791,8 +712,8 @@ private fun OtpCaret(modifier: Modifier = Modifier) {
 
     Box(
         modifier = modifier
-            .width(2.dp) // w-0.5
-            .height(24.dp) // h-6
+            .width(2.dp)
+            .height(24.dp)
             .graphicsLayer { this.alpha = alpha }
             .clip(RoundedCornerShape(1.dp))
             .background(MaterialTheme.colorScheme.primary),
@@ -848,26 +769,23 @@ private fun CountdownLabel(timerSeconds: Int, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp), // gap-1.5
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         Icon(
             imageVector = OneRouteIcons.Timer,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(18.dp), // text-[18px]
+            modifier = Modifier.size(18.dp),
         )
         Text(
             text = text,
-            style = MaterialTheme.typography.labelSmall, // label-sm
+            style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }
 
-/**
- * Text-only resend trigger. Disabled it mirrors the mock's
- * `text-outline cursor-not-allowed`; enabled it steps up to `text-primary`.
- */
+/** Text-only resend trigger. Disabled it mirrors the mock's `text-outline cursor-not-allowed`; enabled it steps up to `text-primary`. */
 @Composable
 private fun ResendAction(
     canResend: Boolean,
@@ -877,7 +795,7 @@ private fun ResendAction(
 ) {
     Text(
         text = label,
-        style = MaterialTheme.typography.labelLarge, // label-lg
+        style = MaterialTheme.typography.labelLarge,
         color = if (canResend) {
             MaterialTheme.colorScheme.primary
         } else {
@@ -910,22 +828,22 @@ private fun ResendPrompt(
             imageVector = OneRouteIcons.Help,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.secondary,
-            modifier = Modifier.size(16.dp), // text-[16px]
+            modifier = Modifier.size(16.dp),
         )
 
-        Spacer(Modifier.width(4.dp)) // gap-1
+        Spacer(Modifier.width(4.dp))
 
         Text(
             text = stringResource(R.string.verify_otp_resend_prompt),
-            style = MaterialTheme.typography.labelSmall, // label-sm
+            style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.secondary,
         )
 
-        Spacer(Modifier.width(4.dp)) // gap-1
+        Spacer(Modifier.width(4.dp))
 
         Text(
             text = link,
-            style = MaterialTheme.typography.labelLarge, // label-lg
+            style = MaterialTheme.typography.labelLarge,
             color = if (canResend) {
                 MaterialTheme.colorScheme.primary
             } else {
@@ -945,10 +863,7 @@ private fun ResendPrompt(
 // Primary action
 // ---------------------------------------------------------------------------
 
-/**
- * Full-width 48dp full-pill CTA. Disabled until the six digits are in, playing
- * the local "Verificando…" spinner while [isLoading] holds.
- */
+/** Full-width 48dp full-pill CTA. Disabled until the six digits are in, playing the local "Verificando…" spinner while [isLoading] holds. */
 @Composable
 private fun VerifyButton(
     enabled: Boolean,
@@ -959,7 +874,7 @@ private fun VerifyButton(
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(
-        targetValue = if (isPressed && enabled) 0.98f else 1f, // active:scale-[0.98]
+        targetValue = if (isPressed && enabled) 0.98f else 1f,
         label = "verifyScale",
     )
 
@@ -967,13 +882,13 @@ private fun VerifyButton(
         onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
-            .height(48.dp) // h-12
+            .height(48.dp)
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
             },
         enabled = enabled,
-        shape = CircleShape, // rounded-full
+        shape = CircleShape,
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary,
@@ -981,19 +896,19 @@ private fun VerifyButton(
             disabledContentColor = MaterialTheme.colorScheme.outline,
         ),
         elevation = ButtonDefaults.buttonElevation(
-            defaultElevation = OneRouteElevation.Active, // shadow-md
-            pressedElevation = OneRouteElevation.Resting, // active:shadow-sm
+            defaultElevation = OneRouteElevation.Active,
+            pressedElevation = OneRouteElevation.Resting,
         ),
         interactionSource = interactionSource,
         contentPadding = PaddingValues(horizontal = OneRouteSpacing.SpaceMd),
     ) {
         if (isLoading) {
             CircularProgressIndicator(
-                modifier = Modifier.size(20.dp), // text-[20px]
+                modifier = Modifier.size(20.dp),
                 color = MaterialTheme.colorScheme.onPrimary,
                 strokeWidth = 2.dp,
             )
-            Spacer(Modifier.width(OneRouteSpacing.SpaceSm)) // gap-2
+            Spacer(Modifier.width(OneRouteSpacing.SpaceSm))
             Text(
                 text = stringResource(R.string.verify_otp_verifying),
                 style = MaterialTheme.typography.labelLarge.copy(
@@ -1007,11 +922,11 @@ private fun VerifyButton(
                     fontWeight = FontWeight.SemiBold,
                 ),
             )
-            Spacer(Modifier.width(OneRouteSpacing.SpaceSm)) // gap-2
+            Spacer(Modifier.width(OneRouteSpacing.SpaceSm))
             Icon(
                 imageVector = OneRouteIcons.ArrowForward,
                 contentDescription = null,
-                modifier = Modifier.size(20.dp), // text-[20px]
+                modifier = Modifier.size(20.dp),
             )
         }
     }

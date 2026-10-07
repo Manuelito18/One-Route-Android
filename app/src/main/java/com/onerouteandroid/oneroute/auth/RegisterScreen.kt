@@ -104,29 +104,6 @@ import com.onerouteandroid.oneroute.ui.theme.OneRouteSpacing
 import com.onerouteandroid.oneroute.ui.theme.OneRouteType
 import kotlinx.coroutines.delay
 
-/*
- * =============================================================================
- *  Passenger registration — "Únete a RutaCompartida"
- * =============================================================================
- *  Compose port of `specs/ui/registro_screen.html`, built exclusively on the
- *  tokens declared in `specs/ui/DESIGN.md`.
- *
- *  Scope: presentation and local interaction only. No persistence, no network.
- *
- *  Layering:
- *   • [RegisterUiState]      – one immutable snapshot of everything needed to
- *                              draw a frame (text, flags, validation feedback
- *                              and button status).
- *   • [RegisterScreenContent] – stateless and fully hoisted: it takes that
- *                              state plus one callback per user intent, so it
- *                              renders from a @Preview, a test or any other
- *                              destination without extra wiring.
- *   • [RegisterScreen]       – stateful container that owns the in-memory
- *                              state, runs the field validation and drives the
- *                              "Validando… / ¡Cuenta Lista!" micro-interaction.
- * =============================================================================
- */
-
 // ---------------------------------------------------------------------------
 // State model
 // ---------------------------------------------------------------------------
@@ -134,13 +111,10 @@ import kotlinx.coroutines.delay
 /** Identifies a field so focus can be reported as part of [RegisterUiState]. */
 enum class RegisterField { FullName, Email, Phone, Password }
 
-/** Lifecycle of the primary action, driving the button's three visual states. */
+/** Lifecycle of the primary action. */
 enum class RegisterSubmitState { Idle, Submitting, Success }
 
-/**
- * Password strength, expressed as the number of segments to fill in the
- * four-segment meter rendered under the password field.
- */
+/** Password strength, as the number of filled segments in the four-segment meter. */
 enum class PasswordStrength(val filledSegments: Int) {
     Empty(0),
     Weak(1),
@@ -157,12 +131,7 @@ private const val StrengthSegmentCount = 4
 /** Length in characters accepted by the e-mail field. */
 private val EmailRegex = Regex("^[A-Za-z0-9._%+\\-]+@[A-Za-z0-9.\\-]+\\.[A-Za-z]{2,}$")
 
-/**
- * Everything [RegisterScreenContent] needs in order to render one frame.
- *
- * Free of `Context`, callbacks and coroutine scopes by design: a preview or a
- * unit test can build one from a literal and assert on it directly.
- */
+/** Everything [RegisterScreenContent] needs in order to render one frame. */
 @Immutable
 data class RegisterUiState(
     // --- text fields ---
@@ -249,10 +218,7 @@ private data class RegisterErrorCopy(
     val terms: String,
 )
 
-/**
- * Returns the state with per-field errors populated, plus whether any of them
- * fired. Pure: no `Context`, no coroutines, directly unit-testable.
- */
+/** Returns the state with per-field errors populated, plus whether any of them fired. Pure: no `Context`, no coroutines, directly unit-testable. */
 private fun validateRegister(
     state: RegisterUiState,
     copy: RegisterErrorCopy,
@@ -284,19 +250,7 @@ private fun validateRegister(
 // Container
 // ---------------------------------------------------------------------------
 
-/**
- * Stateful entry point for the registration screen.
- *
- * Owns the in-memory [RegisterUiState] so the screen is interactive the moment
- * it is shown: fields accept text, the password toggle flips, both consent
- * boxes toggle, and the primary action validates before playing the
- * "Validando… / ¡Cuenta Lista!" feedback loop.
- *
- * @param onNavigateToLogin invoked when the user taps "Inicia sesión".
- * @param onNavigateBack invoked when the user taps the top app bar back button.
- * @param onOpenTerms invoked when the user taps the "Términos y Condiciones" link.
- * @param onOpenPrivacy invoked when the user taps the "Política de Privacidad" link.
- */
+/** Stateful entry point for the registration screen. */
 @Composable
 fun RegisterScreen(
     modifier: Modifier = Modifier,
@@ -371,14 +325,7 @@ private const val SubmitIndicatorDurationMillis = 900L
 // Stateless content
 // ---------------------------------------------------------------------------
 
-/**
- * Stateless, fully hoisted registration screen.
- *
- * Renders [state] and reports every user intent through its callbacks. It owns
- * no state beyond transient interaction feedback (press scaling, animated
- * colours and the label float), so a [RegisterUiState] literal is all a preview
- * or a Compose test needs.
- */
+/** Stateless, fully hoisted registration screen. */
 @Composable
 fun RegisterScreenContent(
     state: RegisterUiState,
@@ -420,7 +367,6 @@ fun RegisterScreenContent(
                 .imePadding()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = OneRouteSpacing.Margin)
-                // The mock's `pb-12` on <main> plus `pb-space-xl` on the content.
                 .padding(bottom = 48.dp + OneRouteSpacing.SpaceXl),
         ) {
             CommunityBanner()
@@ -493,8 +439,7 @@ private fun RegisterTopBar(
         shadowElevation = OneRouteElevation.Resting,
     ) {
         Column {
-            // The 24dp native status-bar strip; the OS clock and system icons
-            // are drawn by the platform, not by the app.
+            // Native status-bar strip drawn by the platform.
             Spacer(
                 Modifier
                     .fillMaxWidth()
@@ -503,14 +448,14 @@ private fun RegisterTopBar(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(64.dp) // h-16
-                    .padding(horizontal = OneRouteSpacing.SpaceSm) // px-space-sm
+                    .height(64.dp)
+                    .padding(horizontal = OneRouteSpacing.SpaceSm)
                     .consumeWindowInsets(WindowInsets.statusBars),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 IconButton(
                     onClick = onNavigateBack,
-                    modifier = Modifier.size(44.dp), // w-11 h-11
+                    modifier = Modifier.size(44.dp),
                     colors = IconButtonDefaults.iconButtonColors(
                         containerColor = Color.Transparent,
                         contentColor = MaterialTheme.colorScheme.onSurface,
@@ -544,11 +489,7 @@ private fun RegisterTopBar(
     }
 }
 
-/**
- * Local stand-in for the remote brand mark in the mock: a primary disc with a
- * white route glyph, so the header keeps its visual weight without pulling in
- * an image loader for a static asset.
- */
+/** Primary disc with a route glyph, standing in for the remote brand mark. */
 @Composable
 private fun BrandMark(
     contentDescription: String,
@@ -556,7 +497,7 @@ private fun BrandMark(
 ) {
     Box(
         modifier = modifier
-            .size(32.dp) // h-8
+            .size(32.dp)
             .clip(CircleShape)
             .background(MaterialTheme.colorScheme.primary)
             .semantics { this.contentDescription = contentDescription },
@@ -578,7 +519,7 @@ private fun ProfileAvatar(
 ) {
     Box(
         modifier = modifier
-            .size(32.dp) // w-8 h-8
+            .size(32.dp)
             .clip(CircleShape)
             .background(MaterialTheme.colorScheme.surfaceContainerHigh)
             .semantics { this.contentDescription = contentDescription },
@@ -602,16 +543,16 @@ private fun CommunityBanner(modifier: Modifier = Modifier) {
     Surface(
         modifier = modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surfaceContainerLow,
-        shape = RoundedCornerShape(OneRouteRadius.Card), // rounded-lg
-        shadowElevation = OneRouteElevation.Resting, // shadow-sm
+        shape = RoundedCornerShape(OneRouteRadius.Card),
+        shadowElevation = OneRouteElevation.Resting,
     ) {
         Row(
-            modifier = Modifier.padding(OneRouteSpacing.SpaceMd), // p-space-md
+            modifier = Modifier.padding(OneRouteSpacing.SpaceMd),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Row(
-                    modifier = Modifier.padding(bottom = OneRouteSpacing.SpaceXs), // mb-1
+                    modifier = Modifier.padding(bottom = OneRouteSpacing.SpaceXs),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(OneRouteSpacing.SpaceXs),
                 ) {
@@ -625,7 +566,7 @@ private fun CommunityBanner(modifier: Modifier = Modifier) {
                         text = stringResource(R.string.community_badge).uppercase(),
                         style = MaterialTheme.typography.labelSmall.copy(
                             fontWeight = FontWeight.Bold,
-                            letterSpacing = 1.1.sp, // tracking-wider
+                            letterSpacing = 1.1.sp,
                         ),
                         color = MaterialTheme.colorScheme.primary,
                     )
@@ -664,7 +605,6 @@ private fun CommunityAvatarStack(modifier: Modifier = Modifier) {
 
     Row(
         modifier = modifier.semantics { contentDescription = description },
-        // Tailwind's `-space-x-3`.
         horizontalArrangement = Arrangement.spacedBy((-12).dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -727,7 +667,7 @@ private fun RegisterForm(
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(OneRouteSpacing.SpaceMd), // gap-space-md
+        verticalArrangement = Arrangement.spacedBy(OneRouteSpacing.SpaceMd),
     ) {
         // -- 1. Full name ---------------------------------------------------
         RegisterTextField(
@@ -771,8 +711,8 @@ private fun RegisterForm(
             } else {
                 null
             },
-            textEndPadding = 44.dp, // pr-11
-            trailingEndPadding = 14.dp, // right-3.5
+            textEndPadding = 44.dp,
+            trailingEndPadding = 14.dp,
             keyboardOptions = KeyboardOptions(
                 capitalization = KeyboardCapitalization.None,
                 keyboardType = KeyboardType.Email,
@@ -792,7 +732,6 @@ private fun RegisterForm(
             leadingIcon = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     FieldLeadingIcon(OneRouteIcons.Call)
-                    // The mock pins the country pill at `left-11`, i.e. 6dp
                     // past the 22dp glyph that starts at 16dp.
                     Spacer(Modifier.width(6.dp))
                     CountryCodePill(
@@ -830,8 +769,8 @@ private fun RegisterForm(
                         onToggle = onTogglePasswordVisibility,
                     )
                 },
-                textEndPadding = 48.dp, // pr-12
-                trailingEndPadding = 8.dp, // right-2
+                textEndPadding = 48.dp,
+                trailingEndPadding = 8.dp,
                 visualTransformation = if (state.isPasswordVisible) {
                     VisualTransformation.None
                 } else {
@@ -866,7 +805,7 @@ private fun RegisterForm(
         }
 
         // -- 5. Terms & Privacy (mandatory) --------------------------------
-        Spacer(Modifier.height(OneRouteSpacing.SpaceXs)) // mt-space-xs
+        Spacer(Modifier.height(OneRouteSpacing.SpaceXs))
         ConsentRow(
             checked = state.termsAccepted,
             onCheckedChange = onTermsAcceptedChange,
@@ -891,7 +830,7 @@ private fun RegisterForm(
             submitState = state.submitState,
             enabled = !state.isBusy,
             onClick = onRegisterClick,
-            modifier = Modifier.padding(top = OneRouteSpacing.SpaceSm), // mt-space-sm
+            modifier = Modifier.padding(top = OneRouteSpacing.SpaceSm),
         )
     }
 }
@@ -900,17 +839,7 @@ private fun RegisterForm(
 // Form primitives
 // ---------------------------------------------------------------------------
 
-/**
- * One 56dp white plane carrying a floating label, an optional leading and
- * trailing slot, and a helper line underneath.
- *
- * Built on [BasicTextField] rather than Material's `TextField` on purpose: the
- * mock asks for a borderless plane whose shadow steps from Level 1 to Level 2 on
- * focus (`focus-within:shadow-md`), a label that floats *over* the top edge, and
- * a helper line inset 12dp from the field edge rather than from the text column.
- * None of that is reachable through Material's slots, and a `TextField` cannot
- * cast the tinted shadow because it owns its own background.
- */
+/** 56dp plane with a floating label, optional leading/trailing slots and a helper line. */
 @Composable
 private fun RegisterTextField(
     value: String,
@@ -925,7 +854,6 @@ private fun RegisterTextField(
     trailingIcon: (@Composable () -> Unit)? = null,
     helperIsPrimary: Boolean = false,
     reserveHelperSpace: Boolean = true,
-    // `pr-4` on the input; the mock widens it to `pr-11` / `pr-12` on the two
     // fields that carry a trailing control.
     textEndPadding: Dp = OneRouteSpacing.SpaceMd,
     trailingEndPadding: Dp = textEndPadding,
@@ -933,14 +861,14 @@ private fun RegisterTextField(
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
 ) {
-    val shape = RoundedCornerShape(OneRouteRadius.Field) // rounded-[12px]
+    val shape = RoundedCornerShape(OneRouteRadius.Field)
     val onSurface = MaterialTheme.colorScheme.onSurface
     val onSurfaceVariant = MaterialTheme.colorScheme.onSurfaceVariant
     val primary = MaterialTheme.colorScheme.primary
     val error = MaterialTheme.colorScheme.error
 
     // The label floats as soon as the field holds a value or has focus, exactly
-    // like the mock's `peer-placeholder-shown` / `peer-focus` peer selectors.
+
     val labelFloated = focused || value.isNotEmpty()
 
     val labelColor by animateColorAsState(
@@ -952,21 +880,19 @@ private fun RegisterTextField(
         label = "fieldLabelColor",
     )
     val labelOffset by animateDpAsState(
-        targetValue = if (labelFloated) (-14).dp else 0.dp, // -translate-y-3.5
+        targetValue = if (labelFloated) (-14).dp else 0.dp,
         animationSpec = tween(FieldAnimationMillis),
         label = "fieldLabelOffset",
     )
     val labelScale by animateFloatAsState(
-        targetValue = if (labelFloated) 0.8f else 1f, // scale-[0.8]
+        targetValue = if (labelFloated) 0.8f else 1f,
         animationSpec = tween(FieldAnimationMillis),
         label = "fieldLabelScale",
     )
 
-    // The leading slot is measured so the floating label can clear it no matter
-    // how wide the slot is: the standard fields need 48dp (left-4 + 22dp glyph +
-    // 10dp), while the phone field has to clear the country-code pill as well.
-    // The measurement is seeded with the plain glyph width so the three regular
-    // fields land on 48dp without a one-frame correction.
+    // Measured so the floating label always clears the leading slot, which
+    // varies between the plain glyph and the country-code pill. Seeded with the
+    // plain glyph width to avoid a one-frame correction.
     val density = LocalDensity.current
     var leadingWidthPx by remember {
         mutableStateOf(with(density) { LeadingIconSize.roundToPx() })
@@ -982,7 +908,7 @@ private fun RegisterTextField(
             focused = focused,
             isError = isError,
             shape = shape,
-            height = FieldHeight, // h-14
+            height = FieldHeight,
             restContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
             focusContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
             onFocusChange = onFocusChange,
@@ -994,7 +920,7 @@ private fun RegisterTextField(
                 if (leadingIcon != null) {
                     Box(
                         modifier = Modifier
-                            .padding(start = LeadingStartInset) // left-4
+                            .padding(start = LeadingStartInset)
                             .onSizeChanged { leadingWidthPx = it.width },
                         contentAlignment = Alignment.CenterStart,
                     ) {
@@ -1015,7 +941,6 @@ private fun RegisterTextField(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(end = textEndPadding)
-                            // pt-4 pb-1
                             .padding(top = 16.dp, bottom = 4.dp),
                         enabled = true,
                         readOnly = false,
@@ -1102,10 +1027,10 @@ private fun CountryCodePill(
         modifier = modifier
             .clip(CircleShape)
             .background(MaterialTheme.colorScheme.surfaceContainer)
-            .padding(horizontal = 8.dp, vertical = 4.dp) // px-2 py-1
+            .padding(horizontal = 8.dp, vertical = 4.dp)
             .semantics { this.contentDescription = contentDescription },
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp), // gap-1
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         Text(text = flag, style = MaterialTheme.typography.labelSmall)
         Text(
@@ -1133,7 +1058,7 @@ private fun PasswordVisibilityToggle(
 ) {
     IconButton(
         onClick = onToggle,
-        modifier = modifier.size(40.dp), // w-10 h-10
+        modifier = modifier.size(40.dp),
         colors = IconButtonDefaults.iconButtonColors(
             containerColor = Color.Transparent,
             contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -1165,18 +1090,18 @@ private fun PasswordStrengthMeter(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp), // px-3
-        verticalArrangement = Arrangement.spacedBy(6.dp), // gap-1.5
+            .padding(horizontal = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp), // gap-1.5
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             repeat(StrengthSegmentCount) { index ->
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .height(4.dp) // h-1
+                        .height(4.dp)
                         .clip(CircleShape)
                         .background(
                             if (index < strength.filledSegments) {
@@ -1188,7 +1113,7 @@ private fun PasswordStrengthMeter(
                 )
             }
             if (strength != PasswordStrength.Empty) {
-                Spacer(Modifier.width(4.dp)) // ml-1
+                Spacer(Modifier.width(4.dp))
                 Text(
                     text = stringResource(passwordStrengthLabel(strength)),
                     style = MaterialTheme.typography.labelSmall,
@@ -1200,7 +1125,7 @@ private fun PasswordStrengthMeter(
         if (strength >= PasswordStrength.Strong) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp), // gap-1
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 Icon(
                     imageVector = OneRouteIcons.Done,
@@ -1238,13 +1163,13 @@ private fun ConsentRow(
                 role = Role.Checkbox,
                 onValueChange = onCheckedChange,
             ),
-        verticalAlignment = Alignment.Top, // items-start
+        verticalAlignment = Alignment.Top,
     ) {
         Box(
             modifier = Modifier
-                .padding(top = 2.dp) // mt-0.5
-                .size(24.dp) // w-6 h-6
-                .clip(RoundedCornerShape(OneRouteRadius.Checkbox)) // rounded-[6px]
+                .padding(top = 2.dp)
+                .size(24.dp)
+                .clip(RoundedCornerShape(OneRouteRadius.Checkbox))
                 .background(
                     if (checked) {
                         MaterialTheme.colorScheme.primary
@@ -1264,7 +1189,7 @@ private fun ConsentRow(
             }
         }
 
-        Spacer(Modifier.width(12.dp)) // gap-3
+        Spacer(Modifier.width(12.dp))
 
         Box(modifier = Modifier.weight(1f)) {
             label()
@@ -1272,10 +1197,7 @@ private fun ConsentRow(
     }
 }
 
-/**
- * "Acepto los Términos y Condiciones y la Política de Privacidad." with both
- * documents as real links: focusable, and announced as links by TalkBack.
- */
+/** "Acepto los Términos y Condiciones y la Política de Privacidad." with both documents as real links: focusable, and announced as links by TalkBack. */
 @Composable
 private fun TermsLabel(
     onOpenTerms: () -> Unit,
@@ -1284,8 +1206,6 @@ private fun TermsLabel(
 ) {
     val primary = MaterialTheme.colorScheme.primary
     val titleMedium = MaterialTheme.typography.titleMedium
-
-    // The mock renders both documents in `font-title-md font-semibold` +
     // underline, even though the surrounding copy is `body-md`.
     val linkStyle = SpanStyle(
         color = primary,
@@ -1340,11 +1260,7 @@ private const val PrivacyLinkTag = "register.privacy"
 // Primary action
 // ---------------------------------------------------------------------------
 
-/**
- * Full-width 56dp full-pill button carrying the three states of the mock's
- * `submit-signup` micro-interaction: "Crear cuenta" → "Validando…" → "¡Cuenta
- * Lista!".
- */
+/** Full-width 56dp full-pill button carrying the three states of the mock's `submit-signup` micro-interaction: "Crear cuenta" → "Validando…" → "¡Cuenta Lista!". */
 @Composable
 private fun RegisterSubmitButton(
     submitState: RegisterSubmitState,
@@ -1374,7 +1290,7 @@ private fun RegisterSubmitButton(
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(
-        targetValue = if (isPressed && enabled) 0.99f else 1f, // active:scale-[0.99]
+        targetValue = if (isPressed && enabled) 0.99f else 1f,
         label = "submitScale",
     )
 
@@ -1382,20 +1298,20 @@ private fun RegisterSubmitButton(
         onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
-            .height(56.dp) // h-14
+            .height(56.dp)
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
             },
         enabled = enabled,
-        shape = CircleShape, // rounded-full
+        shape = CircleShape,
         colors = ButtonDefaults.buttonColors(
             containerColor = containerColor,
             contentColor = contentColor,
         ),
         elevation = ButtonDefaults.buttonElevation(
-            defaultElevation = OneRouteElevation.Active, // shadow-md
-            pressedElevation = OneRouteElevation.Resting, // active:shadow-sm
+            defaultElevation = OneRouteElevation.Active,
+            pressedElevation = OneRouteElevation.Resting,
         ),
         interactionSource = interactionSource,
         contentPadding = PaddingValues(horizontal = OneRouteSpacing.SpaceMd),
@@ -1412,7 +1328,7 @@ private fun RegisterSubmitButton(
                     color = contentColor,
                     strokeWidth = 2.dp,
                 )
-                Spacer(Modifier.width(OneRouteSpacing.SpaceXs)) // gap-space-xs
+                Spacer(Modifier.width(OneRouteSpacing.SpaceXs))
                 Text(
                     text = stringResource(R.string.register_submitting).uppercase(),
                     style = MaterialTheme.typography.labelLarge.copy(
@@ -1432,7 +1348,7 @@ private fun RegisterSubmitButton(
 @Composable
 private fun SubmitButtonLabel(icon: ImageVector, text: String) {
     Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(20.dp))
-    Spacer(Modifier.width(OneRouteSpacing.SpaceXs)) // gap-space-xs
+    Spacer(Modifier.width(OneRouteSpacing.SpaceXs))
     Text(
         text = text.uppercase(),
         style = MaterialTheme.typography.labelLarge.copy(
@@ -1455,7 +1371,7 @@ private fun LoginRedirection(
 
     Row(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center, // justify-center
+        horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
@@ -1463,7 +1379,7 @@ private fun LoginRedirection(
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        Spacer(Modifier.width(6.dp)) // gap-1.5
+        Spacer(Modifier.width(6.dp))
         Text(
             text = actionLabel,
             style = MaterialTheme.typography.titleMedium.copy(
@@ -1485,15 +1401,15 @@ private fun TrustBadge(modifier: Modifier = Modifier) {
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(OneRouteRadius.Sheet)) // rounded-xl
+            .clip(RoundedCornerShape(OneRouteRadius.Sheet))
             // bg-secondary-container/40
             .background(MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f))
-            .padding(OneRouteSpacing.SpaceMd), // p-space-md
+            .padding(OneRouteSpacing.SpaceMd),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
             modifier = Modifier
-                .size(40.dp) // w-10 h-10
+                .size(40.dp)
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.secondaryContainer),
             contentAlignment = Alignment.Center,
@@ -1506,7 +1422,7 @@ private fun TrustBadge(modifier: Modifier = Modifier) {
             )
         }
 
-        Spacer(Modifier.width(OneRouteSpacing.SpaceMd)) // gap-space-md
+        Spacer(Modifier.width(OneRouteSpacing.SpaceMd))
 
         Column {
             Text(

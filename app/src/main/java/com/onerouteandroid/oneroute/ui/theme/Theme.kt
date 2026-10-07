@@ -13,11 +13,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 /*
- * The light scheme is the literal `colors` block from specs/ui/DESIGN.md.
- *
- * The dark scheme is not specified by the design system, so it is derived from
- * the same tonal family: the `inverse-*` / `*-fixed*` roles take over as the
- * light-facing roles, and the surface containers step down through the
+ * Light is the literal `colors` block from specs/ui/DESIGN.md. Dark is derived
+ * from the same tonal family: `inverse-*` / `*-fixed*` roles take over as the
+ * light-facing roles and the surface containers step down the
  * `on-surface` → `inverse-surface` ramp.
  */
 private val LightColorScheme = lightColorScheme(
@@ -101,8 +99,7 @@ private val DarkColorScheme = darkColorScheme(
 @Composable
 fun OneRouteAndroidTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Off by default: Material You would repaint the OneRoute brand indigo, and
-    // the approved mock-ups are pinned to the DESIGN.md palette.
+    // Off by default: Material You would repaint the OneRoute brand indigo.
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit,
 ) {
